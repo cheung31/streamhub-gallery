@@ -29,17 +29,17 @@ define([
 
     var GALLERY_STYLE_EL;
     var GALLERY_CSS = ".content-before { \
-        -webkit-transform: translate3d(-9999px, 0, 0); \
-        -moz-transform: translate3d(-9999px, 0, 0); \
-        -ms-transform: translate3d(-9999px, 0, 0); \
-        -o-transform: translate3d(-9999px, 0, 0); \
-        transform: translate3d(-9999px, 0, 0); } \
+        -webkit-transform: translate(-9999px, 0); \
+        -moz-transform: translate(-9999px, 0); \
+        -ms-transform: translate(-9999px, 0); \
+        -o-transform: translate(-9999px, 0); \
+        transform: translate(-9999px, 0); } \
     .content-after { \
-        -webkit-transform: translate3d(1920px, 0, 0); \
-        -moz-transform: translate3d(1920px, 0, 0); \
-        -ms-transform: translate3d(1920px, 0, 0); \
-        -o-transform: translate3d(1920px, 0, 0); \
-        transform: translate3d(1920px, 0, 0); }";
+        -webkit-transform: translate(1920px, 0); \
+        -moz-transform: translate(1920px, 0); \
+        -ms-transform: translate(1920px, 0); \
+        -o-transform: translate(1920px, 0); \
+        transform: translate(1920px, 0); }";
 
     var GalleryView = function (opts) {
         opts = opts || {};
@@ -171,43 +171,43 @@ define([
 
         this.$el.find('.content-active').css(
             getTransformCssObject(
-                'translate3d(0,0,0)',
+                'translate(0,0)',
                 {'opacity': 1}
             )
         );
         this.$el.find('.content-before-1').css(
             getTransformCssObject(
-                'translate3d(' + -1 * contentWidth + 'px,0,0)',
+                'translate(' + -1 * contentWidth + 'px,0)',
                 {'opacity': 0.5}
             )
         );
         this.$el.find('.content-before-2').css(
             getTransformCssObject(
-                'translate3d(' + -2 * contentWidth + 'px, 0, 0)',
+                'translate(' + -2 * contentWidth + 'px, 0)',
                 {'opacity': 0.3}
             )
         );
         this.$el.find('.content-before-3').css(
             getTransformCssObject(
-                'translate3d(' + -3 * contentWidth + 'px, 0, 0)',
+                'translate(' + -3 * contentWidth + 'px, 0)',
                 {'opacity': 0.1}
             )
         );
         this.$el.find('.content-after-1').css(
             getTransformCssObject(
-                'translate3d(' + 1 * contentWidth + 'px,0,0)',
+                'translate(' + 1 * contentWidth + 'px,0)',
                 {'opacity': 0.5}
             )
         );
         this.$el.find('.content-after-2').css(
             getTransformCssObject(
-                'translate3d(' + 2 * contentWidth + 'px, 0, 0)',
+                'translate(' + 2 * contentWidth + 'px, 0)',
                 {'opacity': 0.3}
             )
         );
         this.$el.find('.content-after-3').css(
             getTransformCssObject(
-                'translate3d(' + 3 * contentWidth + 'px, 0, 0)',
+                'translate(' + 3 * contentWidth + 'px, 0)',
                 {'opacity': 0.1}
             )
         );
