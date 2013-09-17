@@ -1,0 +1,21 @@
+{
+  "name": "streamhub-gallery",
+  "version": "0.0.0",
+  "main": [
+    "./src/main.js"
+  ],
+  "dependencies": {
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#v1.2.0-build.233",
+    "jquery": "~1.9.1",
+    "hogan": "latest",
+    "requirejs": "~2.1.5",
+    "requirejs-text": "~2.0.5",
+    "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1",
+    "bespoke": "git@github.com:markdalgleish/bespoke.js.git"
+  },
+  "devDependencies": {
+    "jasmine": "*",
+    "jasmine-jquery": "*",
+    "almond": "~0.2.5"
+  }
+}
