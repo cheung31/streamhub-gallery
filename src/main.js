@@ -7,6 +7,7 @@ define([
     var CSS = ".streamhub-horizontal-list-view.streamhub-gallery-view { \
         position: static; \
         width: 100%; \
+        overflow-x: hidden; \
         -webkit-perspective: 600px; \
         -moz-perspective: 600px; \
         -ms-perspective: 600px; \
@@ -69,8 +70,13 @@ define([
     };
 
     GalleryView.prototype._insert = function (contentView) {
-        var newContentViewIndex,
+        var self = this,
+            newContentViewIndex,
             $previousEl;
+
+        contentView.$el.on('click', function (e) {
+            self.focus({ contentView: contentView });
+        });
 
         newContentViewIndex = this.contentViews.indexOf(contentView);
 
@@ -110,6 +116,7 @@ define([
         var targetContentEl = this.contentViews[activeIndex].$el;
         var targetContainerEl = targetContentEl.parent();
         targetContainerEl.addClass('content-active');
+        this.$el.find('.content-container').removeClass('content-before').removeClass('content-after').removeAttr('style');
         targetContainerEl.prevAll().addClass('content-before');
         targetContainerEl.nextAll().addClass('content-after');
         var before1 = targetContainerEl.prev().addClass('content-before-1');
