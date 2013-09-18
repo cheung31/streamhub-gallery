@@ -15,6 +15,7 @@ define([
         float: left; \
         padding: 5px; \
         box-sizing: border-box; \
+        -moz-box-sizing: border-box; \
         height: 100%; } \
     .streamhub-horizontal-list-view .content { \
         height: 100%; \
@@ -24,7 +25,7 @@ define([
         opts = opts || {};
         ListView.call(this, opts);
 
-        this._aspectRatio = opts.aspectRatio || 16/10;
+        this._aspectRatio = opts.aspectRatio || 16/9;
         this._id = 'streamhub-horizontal-list-'+new Date().getTime();
 
         opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
