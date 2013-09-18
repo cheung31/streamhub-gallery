@@ -4,7 +4,7 @@ define([
 ], function (HorizontalListView, util) {
 
     var STYLE_EL;
-    var CSS = ".streamhub-gallery-view { \
+    var CSS = ".streamhub-horizontal-list-view.streamhub-gallery-view { \
         position: static; \
         width: 100%; \
         overflow: hidden; \
@@ -30,17 +30,17 @@ define([
 
     var GALLERY_STYLE_EL;
     var GALLERY_CSS = ".content-before { \
-        -webkit-transform: translate(-9999px, 0px); \
-        -moz-transform: translate(-9999px, 0px); \
-        -ms-transform: translate(-9999px, 0px); \
-        -o-transform: translate(-9999px, 0px); \
-        transform: translate(-9999px, 0px); } \
+        -webkit-transform: translate(-9999px, 0px) scale(0.95); \
+        -moz-transform: translate(-9999px, 0px) scale(0.95); \
+        -ms-transform: translate(-9999px, 0px) scale(0.95); \
+        -o-transform: translate(-9999px, 0px) scale(0.95); \
+        transform: translate(-9999px, 0px) scale(0.95); } \
     .content-after { \
-        -webkit-transform: translate(1920px, 0px); \
-        -moz-transform: translate(1920px, 0px); \
-        -ms-transform: translate(1920px, 0px); \
-        -o-transform: translate(1920px, 0px); \
-        transform: translate(1920px, 0px); }";
+        -webkit-transform: translate(1920px, 0px) scale(0.95); \
+        -moz-transform: translate(1920px, 0px) scale(0.95); \
+        -ms-transform: translate(1920px, 0px) scale(0.95); \
+        -o-transform: translate(1920px, 0px) scale(0.95); \
+        transform: translate(1920px, 0px) scale(0.95); }";
 
     var FULLSCREEN_CSS = ".content-before { \
         -webkit-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
@@ -58,7 +58,7 @@ define([
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.modal = false;
-        this._fullscreen = opts.fullscreen || true;
+        this._fullscreen = opts.fullscreen || false;
 
         HorizontalListView.call(this, opts);
 
@@ -242,37 +242,37 @@ define([
         );
         this.$el.find('.content-before-1').css(
             getTransformCssObject(
-                'translate(' + -1 * contentWidth + 'px,0px)',
-                {'opacity': 0.5}
+                'translate(' + -1 * contentWidth + 'px,0px) scale(0.95)',
+                {'opacity': 0.7}
             )
         );
         this.$el.find('.content-before-2').css(
             getTransformCssObject(
-                'translate(' + -2 * contentWidth + 'px,0px)',
+                'translate(' + -2 * contentWidth + 'px,0px) scale(0.95)',
                 {'opacity': 0.3}
             )
         );
         this.$el.find('.content-before-3').css(
             getTransformCssObject(
-                'translate(' + -3 * contentWidth + 'px,0px)',
+                'translate(' + -3 * contentWidth + 'px,0px) scale(0.95)',
                 {'opacity': 0.1}
             )
         );
         this.$el.find('.content-after-1').css(
             getTransformCssObject(
-                'translate(' + 1 * contentWidth + 'px,0px)',
-                {'opacity': 0.5}
+                'translate(' + 1 * contentWidth + 'px,0px) scale(0.95)',
+                {'opacity': 0.7}
             )
         );
         this.$el.find('.content-after-2').css(
             getTransformCssObject(
-                'translate(' + 2 * contentWidth + 'px, 0px)',
+                'translate(' + 2 * contentWidth + 'px, 0px) scale(0.95)',
                 {'opacity': 0.3}
             )
         );
         this.$el.find('.content-after-3').css(
             getTransformCssObject(
-                'translate(' + 3 * contentWidth + 'px, 0px)',
+                'translate(' + 3 * contentWidth + 'px, 0px) scale(0.95)',
                 {'opacity': 0.1}
             )
         );
@@ -295,7 +295,7 @@ define([
         this.$el.find('.content-before-1').css(
             getTransformCssObject(
                 'translateX('+ -contentWidth/2 +'px) rotateY(-30deg) translateX('+-contentWidth/2+'px)',
-                {'opacity': 0.5}
+                {'opacity': 0.7}
             )
         );
         this.$el.find('.content-before-2').css(
@@ -307,7 +307,7 @@ define([
         this.$el.find('.content-after-1').css(
             getTransformCssObject(
                 'translateX('+contentWidth/2+'px) rotateY(30deg) translateX('+contentWidth/2+'px)',
-                {'opacity': 0.5}
+                {'opacity': 0.7}
             )
         );
         this.$el.find('.content-after-2').css(
