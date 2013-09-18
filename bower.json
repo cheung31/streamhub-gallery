@@ -11,7 +11,7 @@
     "requirejs": "~2.1.5",
     "requirejs-text": "~2.0.5",
     "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1",
-    "bespoke": "git@github.com:markdalgleish/bespoke.js.git"
+    "requirejs-plugins": "~1.0.2"
   },
   "devDependencies": {
     "jasmine": "*",

@@ -57,7 +57,8 @@ define([
 
     var GalleryView = function (opts) {
         opts = opts || {};
-        this._fullscreen = opts.fullscreen || false;
+        opts.modal = false;
+        this._fullscreen = opts.fullscreen || true;
 
         HorizontalListView.call(this, opts);
 
@@ -74,8 +75,28 @@ define([
 
     GalleryView.prototype.setElement = function (el) {
         HorizontalListView.prototype.setElement.call(this, el);
-        this.$el.on('click', '.content-container.inactive', function (e) {
+        var self = this;
+
+        this.$el.on('focusContent.hub', function (e) {
+            var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
+            if ($(contentEl).parent().hasClass('content-before') || $(contentEl).parent().hasClass('content-after')) {
+                e.stopImmediatePropagation();
+            }
+        });
+
+        this.$el.on('click', '.content-before, .content-after', function (e) {
             e.preventDefault();
+            e.stopPropagation();
+
+            var targetContentView;
+            for (var i=0; i < self.contentViews.length; i++) {
+                var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
+                if (self.contentViews[i].el === contentEl) {
+                    targetContentView = self.contentViews[i];
+                    break;
+                }
+            }
+            self.focus({ contentView: targetContentView });
         });
         this.$el.addClass(this.galleryListViewClassName);
     };
@@ -84,10 +105,6 @@ define([
         var self = this,
             newContentViewIndex,
             $previousEl;
-
-        contentView.$el.on('click', function (e) {
-            self.focus({ contentView: contentView });
-        });
 
         newContentViewIndex = this.contentViews.indexOf(contentView);
 
@@ -162,8 +179,13 @@ define([
 
     GalleryView.prototype._getContentSize = function () {
         var containerHeight = this.$el.height();
-        var contentWidth = Math.min(containerHeight * this._aspectRatio, this.$el.width());
-        console.log({ width: contentWidth, height: contentWidth / this._aspectRatio });
+        var containerWidth = this.$el.width();
+        var contentWidth = Math.min(containerHeight * this._aspectRatio, containerWidth);
+
+        if (contentWidth == containerWidth) {
+            contentWidth = contentWidth * 0.8;
+        }
+
         return { width: contentWidth, height: contentWidth / this._aspectRatio };
     };
 
@@ -258,7 +280,7 @@ define([
 
     GalleryView.prototype._fullscreenSpacing = function (contentWidth) {
         if (! GALLERY_STYLE_EL) {
-            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(GALLERY_CSS).appendTo('head'); }, 700);
+            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head'); }, 700);
         } else {
             GALLERY_STYLE_EL.remove();
             GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head');
@@ -278,8 +300,8 @@ define([
         );
         this.$el.find('.content-before-2').css(
             getTransformCssObject(
-                'translateX(-590px) rotateY(-52deg) translateX(-780px)',
-                {'opacity': 0.1}
+                'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
+                {'opacity': 0.05}
             )
         );
         this.$el.find('.content-after-1').css(
@@ -290,8 +312,8 @@ define([
         );
         this.$el.find('.content-after-2').css(
             getTransformCssObject(
-                'translateX(590px) rotateY(52deg) translateX(780px)',
-                {'opacity': 0.1}
+                'translateX('+contentWidth+'px) rotateY(52deg) translateX('+contentWidth+'px)',
+                {'opacity': 0.05}
             )
         );
     };

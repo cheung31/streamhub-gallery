@@ -7,12 +7,16 @@ requirejs.config({
     text: 'lib/requirejs-text/text',
     hgn: 'lib/requirejs-hogan-plugin/hgn',
     hogan: 'lib/hogan/web/builds/2.0.0/hogan-2.0.0.amd',
+    json: 'lib/requirejs-plugins/src/json',
     base64: 'lib/base64/base64',
     bespoke: 'lib/bespoke/src/bespoke'
   },
   packages: [{
     name: 'streamhub-sdk',
     location: 'lib/streamhub-sdk/src'
+  },{
+    name: 'streamhub-sdk-tests',
+    location: 'lib/streamhub-sdk/tests/'
   },
   {
 	name: "streamhub-gallery",

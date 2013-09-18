@@ -13,6 +13,7 @@ define([
     .streamhub-horizontal-list-view .content-container { \
         display: inline; \
         float: left; \
+        overflow: hidden; \
         padding: 5px; \
         box-sizing: border-box; \
         -moz-box-sizing: border-box; \

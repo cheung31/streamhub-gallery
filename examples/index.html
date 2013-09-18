@@ -24,16 +24,10 @@
         <script>
         require([
             'streamhub-sdk',
-            'streamhub-gallery'
-        ],function (Hub, GalleryView) {
-            var opts = {
-                "network": "labs-t402.fyre.co",
-                "siteId": "303827",
-                // Fast Collection
-                // "articleId": "labs_demo_fire",
-                "articleId": "sh_col_51_1366914813",
-                "environment": "t402.livefyre.com"
-            };
+            'streamhub-gallery',
+            'streamhub-sdk-tests/mocks/mock-attachments-stream',
+            'streamhub-sdk/stream-manager'
+        ],function (Hub, GalleryView, MockAttachmentsStream, StreamManager) {
 
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
@@ -42,7 +36,9 @@
                 //,modal: false
             });
 
-            var livefyreStreams = Hub.StreamManager.create.livefyreStreams(opts)
+            var streams = new StreamManager({
+                main: new MockAttachmentsStream()
+            });
             
             /* Uncomment to filter out content without attachments
             livefyreStreams.on('readable', function (stream) {
@@ -59,8 +55,7 @@
             });
             */
 
-            livefyreStreams.bind(view);
-            livefyreStreams.start();
+            streams.bind(view).start();
         });
         </script>
     </body>
