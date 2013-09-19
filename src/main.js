@@ -301,7 +301,7 @@ define([
         this.$el.find('.content-before-2').css(
             getTransformCssObject(
                 'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
-                {'opacity': 0.05}
+                {'opacity': 0.02}
             )
         );
         this.$el.find('.content-after-1').css(
@@ -313,7 +313,7 @@ define([
         this.$el.find('.content-after-2').css(
             getTransformCssObject(
                 'translateX('+contentWidth+'px) rotateY(52deg) translateX('+contentWidth+'px)',
-                {'opacity': 0.05}
+                {'opacity': 0.02}
             )
         );
     };
