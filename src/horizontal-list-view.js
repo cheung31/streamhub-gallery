@@ -1,37 +1,20 @@
 define([
     'streamhub-sdk/views/list-view',
+    'text!streamhub-gallery/css/horizontal-list-view.css',
     'streamhub-sdk/util'
-], function (ListView, util) {
+], function (ListView, HorizontalListViewCss, util) {
 
     var STYLE_EL;
-    var CSS = ".streamhub-horizontal-list-view { \
-	    position:absolute; \
-        height: 100%; \
-        overflow-x: scroll; \
-        overflow-y: hidden; \
-	} \
-    .streamhub-horizontal-list-view .content-container { \
-        display: inline; \
-        float: left; \
-        overflow: hidden; \
-        padding: 5px; \
-        box-sizing: border-box; \
-        -moz-box-sizing: border-box; \
-        height: 100%; } \
-    .streamhub-horizontal-list-view .content { \
-        height: 100%; \
-        margin-bottom: 0; }";
 
     var HorizontalListView = function (opts) {
         opts = opts || {};
+        this._id = 'streamhub-horizontal-list-'+new Date().getTime();
+        this._aspectRatio = opts.aspectRatio || 16/9;
+
         ListView.call(this, opts);
 
-        this._aspectRatio = opts.aspectRatio || 16/9;
-        this._id = 'streamhub-horizontal-list-'+new Date().getTime();
-
-        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
-        if (!STYLE_EL && opts.css) {
-            STYLE_EL = $('<style></style>').text(CSS).prependTo('head');
+        if (!STYLE_EL) {
+            STYLE_EL = $('<style></style>').text(HorizontalListViewCss).prependTo('head');
         }
 
         var self = this;
@@ -47,7 +30,7 @@ define([
 
     HorizontalListView.prototype.setElement = function (el) {
         ListView.prototype.setElement.call(this, el);
-        this.$el.addClass(this.horizontalListViewClassName);
+        this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
     };
 
     HorizontalListView.prototype._adjustContentSize = function () {

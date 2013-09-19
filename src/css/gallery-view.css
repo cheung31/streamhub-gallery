@@ -1,0 +1,26 @@
+.streamhub-horizontal-list-view.streamhub-gallery-view {
+    position: static; 
+    width: 100%; 
+    overflow: hidden; 
+    -webkit-perspective: 600px; 
+    -moz-perspective: 600px; 
+    -ms-perspective: 600px; 
+    -o-perspective: 600px; 
+    perspective: 600px;
+}
+.streamhub-gallery-view .content-active { 
+    z-index: 1; 
+    opacity: 1;
+} 
+.streamhub-gallery-view .content-container { 
+    opacity: 0; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    margin-bottom: 0; 
+    -webkit-transition: -webkit-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; 
+    -moz-transition: -moz-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; 
+    -ms-transition: -ms-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; 
+    -o-transition: -o-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; 
+    transition: transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; 
+}

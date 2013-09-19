@@ -1,72 +1,34 @@
 define([
     'streamhub-gallery/horizontal-list-view',
+    'text!streamhub-gallery/css/gallery-view.css',
+    'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/util'
-], function (HorizontalListView, util) {
+], function (HorizontalListView, GalleryViewCss, ThemeCssTemplate, util) {
 
-    var STYLE_EL;
-    var CSS = ".streamhub-horizontal-list-view.streamhub-gallery-view { \
-        position: static; \
-        width: 100%; \
-        overflow: hidden; \
-        -webkit-perspective: 600px; \
-        -moz-perspective: 600px; \
-        -ms-perspective: 600px; \
-        -o-perspective: 600px; \
-        perspective: 600px; } \
-    .streamhub-gallery-view .content-active { \
-        z-index: 1; \
-        opacity: 1; } \
-    .streamhub-gallery-view .content-container { \
-        opacity: 0; \
-        position: absolute; \
-        top: 50%; \
-        left: 50%; \
-        margin-bottom: 0; \
-        -webkit-transition: -webkit-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -moz-transition: -moz-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -ms-transition: -ms-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -o-transition: -o-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        transition: transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; }";
+    var STYLE_EL,
+        GALLERY_THEME_STYLE_EL = $('<style></style>');
 
-    var GALLERY_STYLE_EL;
-    var GALLERY_CSS = ".content-before { \
-        -webkit-transform: translate(-9999px, 0px) scale(0.95); \
-        -moz-transform: translate(-9999px, 0px) scale(0.95); \
-        -ms-transform: translate(-9999px, 0px) scale(0.95); \
-        -o-transform: translate(-9999px, 0px) scale(0.95); \
-        transform: translate(-9999px, 0px) scale(0.95); } \
-    .content-after { \
-        -webkit-transform: translate(1920px, 0px) scale(0.95); \
-        -moz-transform: translate(1920px, 0px) scale(0.95); \
-        -ms-transform: translate(1920px, 0px) scale(0.95); \
-        -o-transform: translate(1920px, 0px) scale(0.95); \
-        transform: translate(1920px, 0px) scale(0.95); }";
+    var GALLERY_CSS = {
+        contentBefore: { transform: "translate(-9999px, 0px) scale(0.95)" },
+        contentAfter:  { transform: "translate(9999px, 0px) scale(0.95)"}
+    };
 
-    var FULLSCREEN_CSS = ".content-before { \
-        -webkit-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -moz-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -ms-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -o-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); } \
-    .content-after { \
-        -webkit-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -moz-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -ms-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -o-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        transform: translateX(980px) rotateY(72deg) translateX(1290px); }";
+    var FULLSCREEN_CSS = {
+        contentBefore: { transform: "translateX(-980px) rotateY(-72deg) translateX(-1290px)" },
+        contentAfter: { transform: "translateX(980px) rotateY(72deg) translateX(1290px)"}
+    };
 
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.modal = false;
+
         this._fullscreen = opts.fullscreen || false;
+        this._activeContentView = null;
 
         HorizontalListView.call(this, opts);
 
-        this._activeContentView = null;
-
-        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
-        if (!STYLE_EL && opts.css) {
-            STYLE_EL = $('<style></style>').text(CSS).prependTo('head');
+        if (!STYLE_EL) {
+            STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
         }
     };
     util.inherits(GalleryView, HorizontalListView);
@@ -127,7 +89,7 @@ define([
     GalleryView.prototype.fullscreen = function (off) {
         var contentSize = this._getContentSize();
         off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
-        this._fullscreen = !!off;
+        this._fullscreen = off === undefined ? true : !!off;
     };
 
     GalleryView.prototype.focus = function (opts) {
@@ -207,115 +169,64 @@ define([
         return styleEl;
     };
 
-    function getTransformCssObject(value, otherCss) {
-        var transformProperties = [
-            'transform',
-            '-webkit-transform',
-            '-moz-transform',
-            '-ms-transform',
-            '-o-transform'
-        ];
-        var obj = {};
-        otherCss = otherCss || {};
-        for (var property in transformProperties) {
-            obj[transformProperties[property]] = value;
-        }
-        return $.extend(otherCss, obj);
-    }
-
     GalleryView.prototype._adjustContentSpacing = function (contentWidth) {
         this._fullscreen ? this._fullscreenSpacing(contentWidth) : this._slideshowSpacing(contentWidth);
     };
 
     GalleryView.prototype._slideshowSpacing = function (contentWidth) {
-        if (! GALLERY_STYLE_EL) {
-            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(GALLERY_CSS).appendTo('head'); }, 700);
-        } else {
-            GALLERY_STYLE_EL.remove();
-            GALLERY_STYLE_EL = $('<style></style>').text(GALLERY_CSS).appendTo('head');
-        }
-        this.$el.find('.content-active').css(
-            getTransformCssObject(
-                'translate(0px,0px)',
-                {'opacity': 1}
-            )
-        );
-        this.$el.find('.content-before-1').css(
-            getTransformCssObject(
-                'translate(' + -1 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-before-2').css(
-            getTransformCssObject(
-                'translate(' + -2 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.3}
-            )
-        );
-        this.$el.find('.content-before-3').css(
-            getTransformCssObject(
-                'translate(' + -3 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.1}
-            )
-        );
-        this.$el.find('.content-after-1').css(
-            getTransformCssObject(
-                'translate(' + 1 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-after-2').css(
-            getTransformCssObject(
-                'translate(' + 2 * contentWidth + 'px, 0px) scale(0.95)',
-                {'opacity': 0.3}
-            )
-        );
-        this.$el.find('.content-after-3').css(
-            getTransformCssObject(
-                'translate(' + 3 * contentWidth + 'px, 0px) scale(0.95)',
-                {'opacity': 0.1}
-            )
-        );
+        GALLERY_CSS.contentBefore1 = {
+            transform: 'translate(' + -1 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.7
+        };
+        GALLERY_CSS.contentBefore2 = {
+            transform: 'translate(' + -2 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.3
+        };
+        GALLERY_CSS.contentBefore3 = {
+            transform: 'translate(' + -3 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.1
+        };
+        GALLERY_CSS.contentAfter1 = {
+            transform: 'translate(' + 1 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.7
+        };
+        GALLERY_CSS.contentAfter2 = {
+            transform: 'translate(' + 2 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.3
+        };
+        GALLERY_CSS.contentAfter3 = {
+            transform: 'translate(' + 3 * contentWidth + 'px,0px) scale(0.95)',
+            opacity: 0.1
+        };
+
+        var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
+        styleInnerHtml = styleInnerHtml.replace(new RegExp("\\."+this.galleryListViewClassName, 'g'), '.'+this._id);
+        GALLERY_THEME_STYLE_EL.remove();
+        GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
 
     GalleryView.prototype._fullscreenSpacing = function (contentWidth) {
-        if (! GALLERY_STYLE_EL) {
-            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head'); }, 700);
-        } else {
-            GALLERY_STYLE_EL.remove();
-            GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head');
-        }
+        FULLSCREEN_CSS.contentBefore1 = {
+            transform: 'translateX('+ -contentWidth/2 +'px) rotateY(-30deg) translateX('+ -contentWidth/2 +'px)',
+            opacity: 0.7
+        };
+        FULLSCREEN_CSS.contentBefore2 = {
+            transform: 'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
+            opacity: 0.02
+        };
+        FULLSCREEN_CSS.contentAfter1 = {
+            transform: 'translateX('+ contentWidth/2 +'px) rotateY(30deg) translateX('+ contentWidth/2 +'px)',
+            opacity: 0.7
+        };
+        FULLSCREEN_CSS.contentAfter2 = {
+            transform: 'translateX('+ contentWidth +'px) rotateY(52deg) translateX('+ contentWidth +'px)',
+            opacity: 0.02
+        };
 
-        this.$el.find('.content-active').css(
-            getTransformCssObject(
-                'translate(0px,0px)',
-                {'opacity': 1}
-            )
-        );
-        this.$el.find('.content-before-1').css(
-            getTransformCssObject(
-                'translateX('+ -contentWidth/2 +'px) rotateY(-30deg) translateX('+-contentWidth/2+'px)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-before-2').css(
-            getTransformCssObject(
-                'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
-                {'opacity': 0.02}
-            )
-        );
-        this.$el.find('.content-after-1').css(
-            getTransformCssObject(
-                'translateX('+contentWidth/2+'px) rotateY(30deg) translateX('+contentWidth/2+'px)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-after-2').css(
-            getTransformCssObject(
-                'translateX('+contentWidth+'px) rotateY(52deg) translateX('+contentWidth+'px)',
-                {'opacity': 0.02}
-            )
-        );
+        var styleInnerHtml = ThemeCssTemplate(FULLSCREEN_CSS);
+        styleInnerHtml = styleInnerHtml.replace(new RegExp("\\."+this.galleryListViewClassName, 'g'), '.'+this._id);
+        GALLERY_THEME_STYLE_EL.remove();
+        GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
 
     return GalleryView;
