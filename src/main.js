@@ -27,6 +27,8 @@ define([
 
         HorizontalListView.call(this, opts);
 
+        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
+
         if (!STYLE_EL) {
             STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
         }
@@ -36,7 +38,9 @@ define([
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
 
     GalleryView.prototype.setElement = function (el) {
-        HorizontalListView.prototype.setElement.call(this, el);
+        this.el = document.createElement('div');
+        HorizontalListView.prototype.setElement.call(this, this.el);
+        $(this.el).appendTo(el);
         var self = this;
 
         this.$el.on('focusContent.hub', function (e) {
@@ -60,6 +64,7 @@ define([
             }
             self.focus({ contentView: targetContentView });
         });
+
         this.$el.addClass(this.galleryListViewClassName);
     };
 
@@ -200,7 +205,12 @@ define([
         };
 
         var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
-        styleInnerHtml = styleInnerHtml.replace(new RegExp("\\."+this.galleryListViewClassName, 'g'), '.'+this._id);
+        var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
+        for (var i=0; i < matches.length; i++) {
+            var idx = styleInnerHtml.indexOf(matches[i]);
+            styleInnerHtml = styleInnerHtml.slice(0, idx) + 
+                this._id + styleInnerHtml.slice(idx);
+        }
         GALLERY_THEME_STYLE_EL.remove();
         GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
