@@ -20,7 +20,7 @@ define([
 
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.modal = false;
+        opts.modal = opts.modal || false;
 
         this._fullscreen = opts.fullscreen || false;
         this._activeContentView = null;
@@ -234,7 +234,12 @@ define([
         };
 
         var styleInnerHtml = ThemeCssTemplate(FULLSCREEN_CSS);
-        styleInnerHtml = styleInnerHtml.replace(new RegExp("\\."+this.galleryListViewClassName, 'g'), '.'+this._id);
+        var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
+        for (var i=0; i < matches.length; i++) {
+            var idx = styleInnerHtml.indexOf(matches[i]);
+            styleInnerHtml = styleInnerHtml.slice(0, idx) + 
+                this._id + styleInnerHtml.slice(idx);
+        }
         GALLERY_THEME_STYLE_EL.remove();
         GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };

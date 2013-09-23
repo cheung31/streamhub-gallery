@@ -1,0 +1,155 @@
+define([
+    'streamhub-gallery',
+    'streamhub-sdk/content/content',
+    'jasmine',
+    'jasmine-jquery'
+], function (GalleryView, Content) {
+
+    describe('A GalleryView', function () {
+
+        // construction behavior
+        describe('can be constructed', function() {
+            it ("with no options", function () {
+                var view = new GalleryView();
+                expect(view).toBeDefined();
+                expect(view.modal).toBe(false);
+            });
+
+            it("accepts the opts.modal option", function () {
+                var view = new GalleryView({ modal: true });
+                expect(view).toBeDefined();
+                expect(view.modal).toBe(true);
+            });
+        });
+
+        // setElement
+        describe('can set the HTML element in which to be rendered with the #setElement method', function () {
+
+            var view,
+                myEl;
+
+            beforeEach(function () {
+                view = new GalleryView();
+                myEl = document.createElement('div');
+                myEl.setAttribute('id', 'mycooldiv');
+                view.setElement(myEl);
+            });
+
+            it('.el is the element that we are setting', function () {
+                expect($(view.el).parent()).toBe(myEl);
+            });
+
+            it('has an event listener on the #focusContent.hub event', function () {
+                expect($(view.el)).toHandle('focusContent.hub');
+            });
+
+            it('has an event listener on the #click event', function () {
+                expect($(view.el)).toHandle('click');
+            });
+
+            it('has added the class name "streamhub-gallery-view"', function () {
+                expect(view.el).toHaveClass('streamhub-gallery-view');
+            });
+        });
+
+        describe('can have content items added to it', function () {
+
+            var view,
+                myEl,
+                content = new Content({ body: "this is some dude's comment" });
+
+            beforeEach(function () {
+                view = new GalleryView();
+            });
+
+            it('sets the _activeContentView when the first content item is added to the Gallery View', function () {
+                view.add(content);
+                expect(view._activeContentView).toBeDefined();
+            });
+        });
+
+        // focus a content item
+        describe('can focus a content item', function () {
+
+            var view,
+                myEl,
+                content = new Content({ body: "this is some dude's comment" });
+
+            beforeEach(function () {
+                view = new GalleryView();
+                view.add(content);
+            });
+
+            it('adds the "content-active" class name to the focused content view\'s parent element', function () {
+                view.focus();
+                expect($(view._activeContentView.el).parent()).toHaveClass('content-active');
+            });
+
+            it('adds "content-before" classes to previous siblings.', function () {
+                var content1 = new Content();
+                view.add(content1);
+                var content2 = new Content();
+                view.add(content2);
+                var content3 = new Content();
+                view.add(content3);
+
+                view.focus({ contentView: view.contentViews[view.contentViews.length-1] });
+                expect($(view.contentViews[0].el).parent()).toHaveClass('content-before');
+                expect($(view.contentViews[1].el).parent()).toHaveClass('content-before');
+                expect($(view.contentViews[2].el).parent()).toHaveClass('content-before');
+            });
+
+            it('adds "content-after" classes to next siblings.', function () {
+                var content1 = new Content();
+                view.add(content1);
+                var content2 = new Content();
+                view.add(content2);
+                var content3 = new Content();
+                view.add(content3);
+
+                view.focus({ contentView: view.contentViews[0] });
+                expect($(view.contentViews[1].el).parent()).toHaveClass('content-after');
+                expect($(view.contentViews[2].el).parent()).toHaveClass('content-after');
+                expect($(view.contentViews[3].el).parent()).toHaveClass('content-after');
+            });
+
+            it('calls the ._adjustContentSize method', function () {
+                spyOn(view, '_adjustContentSize');
+                view.focus();
+                expect(view._adjustContentSize).toHaveBeenCalled();
+            });
+        });
+
+        // fullscreen
+        describe('can enable fullscreen mode', function () {
+
+            var view,
+                myEl;
+
+            beforeEach(function () {
+                view = new GalleryView();
+            });
+
+            it('calculates the content size (calls ._getContentSize)', function () {
+                spyOn(view, '_getContentSize').andReturn({ width: 300, height: 300 });
+                view.fullscreen();
+                expect(view._getContentSize).toHaveBeenCalled();
+            });
+
+            it('adjusts content item spacing (calls ._fullscreenSpacing)', function () {
+                spyOn(view, '_fullscreenSpacing');
+                spyOn(view, '_slideshowSpacing');
+                view.fullscreen();
+                expect(view._fullscreenSpacing).toHaveBeenCalled();
+                expect(view._slideshowSpacing).not.toHaveBeenCalled();
+            });
+
+            it('sets ._fullscreen to true', function () {
+                view.fullscreen();
+                expect(view._fullscreen).toBe(true);
+            });
+        });
+
+    });
+ 
+});
