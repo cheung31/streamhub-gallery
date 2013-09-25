@@ -86,6 +86,10 @@ define([
             }
         });
 
+        this.$el.on('imageLoaded.hub', function (e) {
+            self._adjustContentSize();
+        });
+
         this.$el.addClass(this.galleryListViewClassName);
     };
 
@@ -124,10 +128,10 @@ define([
         var originalActiveContentView = this._activeContentView;
         var activeIndex = this.contentViews.indexOf(this._activeContentView);
         var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
-        var newTransforms = this.focus({
+        var newTransforms = $.extend(true, {}, this.focus({
             translate: false,
             contentView: targetContentView
-        });
+        }));
         this.focus({
             contentView: originalActiveContentView
         });
@@ -143,10 +147,10 @@ define([
         var originalActiveContentView = this._activeContentView;
         var activeIndex = this.contentViews.indexOf(this._activeContentView);
         var targetContentView = this.contentViews[activeIndex-1 || 0];
-        var newTransforms = this.focus({
+        var newTransforms = $.extend(true, {}, this.focus({
             translate: false,
             contentView: targetContentView
-        });
+        }));
         this.focus({
             contentView: originalActiveContentView
         });
@@ -219,6 +223,17 @@ define([
         styleEl.html(styles);
         $('head').append(styleEl);
 
+        var contentWithImageEls = this.$el.find('.content-with-image');
+        for (var i=0; i < contentWithImageEls.length; i++) {
+            var contentEl = contentWithImageEls.eq(i).closest('.content-container');
+            contentEl.width(contentSize.height + 'px');
+            contentEl.height(contentSize.height + 'px');
+            contentEl.css({
+                'margin-left': contentSize.height/-2 + 'px',
+                'margin-top': contentSize.height/-2 + 'px'
+            });
+        }
+
         return this._adjustContentSpacing(opts);
     };
 
@@ -230,6 +245,8 @@ define([
         opts = opts || {};
 
         if (opts.translate) {
+            GALLERY_CSS = opts.translate;
+            this._updateStyleEl(opts.translate);
             return;
         }
 
@@ -238,16 +255,16 @@ define([
             return;
         }
 
-        var contentSize = this._getContentSize();
-        var beforeTranslateX = contentSize.width * -1;
-        var afterTranslateX = contentSize.width;
+        var contentActiveEl = adjacentContentEls.filter('.content-active');
+        var activeSize = { width: contentActiveEl.outerWidth(), height: contentActiveEl.outerHeight() }
+        var beforeTranslateX = activeSize.width * -1;
+        var afterTranslateX = activeSize.width;
 
         var contentBefore1 = adjacentContentEls.filter('.content-before-1');
         if (contentBefore1.length) {
-            var contentActiveEl = adjacentContentEls.filter('.content-active')[0];
             var width = contentBefore1[0].getBoundingClientRect().width;
             GALLERY_CSS.contentBefore1.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (contentActiveEl.getBoundingClientRect().width - width)/2  : beforeTranslateX;
+            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (contentActiveEl[0].getBoundingClientRect().width - width)/2  : beforeTranslateX;
             GALLERY_CSS.contentBefore1.transforms.translateX = beforeTranslateX+'px';
             beforeTranslateX = beforeTranslateX - width;
         }
@@ -267,10 +284,9 @@ define([
         }
         var contentAfter1 = adjacentContentEls.filter('.content-after-1');
         if (contentAfter1.length) {
-            var contentActiveEl = adjacentContentEls.filter('.content-active')[0];
             var width = contentAfter1[0].getBoundingClientRect().width;
             GALLERY_CSS.contentAfter1.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (contentActiveEl.getBoundingClientRect().width - width)/2  : afterTranslateX;
+            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (contentActiveEl[0].getBoundingClientRect().width - width)/2  : afterTranslateX;
             GALLERY_CSS.contentAfter1.transforms.translateX = afterTranslateX +'px';
             afterTranslateX = afterTranslateX + width;
         }
