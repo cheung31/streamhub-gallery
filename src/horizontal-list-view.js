@@ -34,6 +34,9 @@ define([
     };
 
     HorizontalListView.prototype._adjustContentSize = function () {
+        if (! this._aspectRatio) {
+            return;
+        }
         var styleEl = $('style.'+this._id);
         if (styleEl) {
             styleEl.remove();

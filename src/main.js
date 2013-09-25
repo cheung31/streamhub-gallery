@@ -1,22 +1,34 @@
 define([
     'streamhub-gallery/horizontal-list-view',
+    'streamhub-gallery/content-view-factory',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/util'
-], function (HorizontalListView, GalleryViewCss, ThemeCssTemplate, util) {
+], function (HorizontalListView, ContentViewFactory, GalleryViewCss, ThemeCssTemplate, util) {
 
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
 
     var GALLERY_CSS = {
-        contentBefore: { transform: "translate(-9999px, 0px) scale(0.95)" },
-        contentAfter:  { transform: "translate(9999px, 0px) scale(0.95)"}
+        contentBefore: {
+            transforms: {
+                translateX: '-9999px',
+                scale: 0.7
+            }
+        },
+        contentAfter: {
+            transforms: {
+                translateX: '9999px',
+                scale: 0.7
+            }
+        }
     };
-
-    var FULLSCREEN_CSS = {
-        contentBefore: { transform: "translateX(-980px) rotateY(-72deg) translateX(-1290px)" },
-        contentAfter: { transform: "translateX(980px) rotateY(72deg) translateX(1290px)"}
-    };
+    GALLERY_CSS.contentBefore1 = { opacity: 0.7 };
+    GALLERY_CSS.contentBefore2 = { opacity: 0.3 };
+    GALLERY_CSS.contentBefore3 = { opacity: 0.1 };
+    GALLERY_CSS.contentAfter1 = { opacity: 0.7 };
+    GALLERY_CSS.contentAfter2 = { opacity: 0.3 };
+    GALLERY_CSS.contentAfter3 = { opacity: 0.1 };
 
     var GalleryView = function (opts) {
         opts = opts || {};
@@ -24,6 +36,7 @@ define([
 
         this._fullscreen = opts.fullscreen || false;
         this._activeContentView = null;
+        this.contentViewFactory = new ContentViewFactory();
 
         HorizontalListView.call(this, opts);
 
@@ -62,7 +75,15 @@ define([
                     break;
                 }
             }
-            self.focus({ contentView: targetContentView });
+
+            //self.focus({ contentView: targetContentView });
+            var activeIndex = self.contentViews.indexOf(self._activeContentView);
+            var targetIndex = self.contentViews.indexOf(targetContentView);
+            if (targetIndex > activeIndex) {
+                self.next();
+            } else if (targetIndex < activeIndex) {
+                self.prev();
+            }
         });
 
         this.$el.addClass(this.galleryListViewClassName);
@@ -92,9 +113,48 @@ define([
     };
 
     GalleryView.prototype.fullscreen = function (off) {
+        return;
         var contentSize = this._getContentSize();
         off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
         this._fullscreen = off === undefined ? true : !!off;
+    };
+
+    GalleryView.prototype.next = function () {
+        this.$el.removeClass('animate');
+        var originalActiveContentView = this._activeContentView;
+        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
+        var newTransforms = this.focus({
+            translate: false,
+            contentView: targetContentView
+        });
+        this.focus({
+            contentView: originalActiveContentView
+        });
+        this.$el.addClass('animate');
+        this.focus({
+            translate: newTransforms,
+            contentView: targetContentView
+        });
+    };
+
+    GalleryView.prototype.prev = function () {
+        this.$el.removeClass('animate');
+        var originalActiveContentView = this._activeContentView;
+        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var targetContentView = this.contentViews[activeIndex-1 || 0];
+        var newTransforms = this.focus({
+            translate: false,
+            contentView: targetContentView
+        });
+        this.focus({
+            contentView: originalActiveContentView
+        });
+        this.$el.addClass('animate');
+        this.focus({
+            translate: newTransforms,
+            contentView: targetContentView
+        });
     };
 
     GalleryView.prototype.focus = function (opts) {
@@ -131,17 +191,7 @@ define([
         var after2 = after1.next().addClass('content-after-2');
         var after3 = after2.next().addClass('content-after-3');
 
-        this._adjustContentSize();
-    };
-
-    GalleryView.prototype.next = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        this.focus({ contentView: this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)] });
-    };
-
-    GalleryView.prototype.prev = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        this.focus({ contentView: this.contentViews[activeIndex-1 || 0] });
+        return this._adjustContentSize(opts);
     };
 
     GalleryView.prototype._getContentSize = function () {
@@ -156,7 +206,7 @@ define([
         return { width: contentWidth, height: contentWidth / this._aspectRatio };
     };
 
-    GalleryView.prototype._adjustContentSize = function () {
+    GalleryView.prototype._adjustContentSize = function (opts) {
         var styleEl = $('style.'+this._id);
         if (styleEl) {
             styleEl.remove();
@@ -166,44 +216,94 @@ define([
         var styles = '';
         var contentSize = this._getContentSize();
         styles = '.'+this.horizontalListViewClassName + ' .'+this.contentContainerClassName + ' { width: ' + contentSize.width + 'px; height: ' + contentSize.height + 'px; margin-left: '+ contentSize.width/-2 + 'px; margin-top: '+ contentSize.height/-2+ 'px; }';
-
-        this._adjustContentSpacing(contentSize.width);
-
         styleEl.html(styles);
         $('head').append(styleEl);
-        return styleEl;
+
+        return this._adjustContentSpacing(opts);
     };
 
-    GalleryView.prototype._adjustContentSpacing = function (contentWidth) {
-        this._fullscreen ? this._fullscreenSpacing(contentWidth) : this._slideshowSpacing(contentWidth);
+    GalleryView.prototype._adjustContentSpacing = function (opts) {
+        return this._fullscreen ? this._fullscreenSpacing(opts) : this._slideshowSpacing(opts);
     };
 
-    GalleryView.prototype._slideshowSpacing = function (contentWidth) {
-        GALLERY_CSS.contentBefore1 = {
-            transform: 'translate(' + -1 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.7
-        };
-        GALLERY_CSS.contentBefore2 = {
-            transform: 'translate(' + -2 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.3
-        };
-        GALLERY_CSS.contentBefore3 = {
-            transform: 'translate(' + -3 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.1
-        };
-        GALLERY_CSS.contentAfter1 = {
-            transform: 'translate(' + 1 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.7
-        };
-        GALLERY_CSS.contentAfter2 = {
-            transform: 'translate(' + 2 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.3
-        };
-        GALLERY_CSS.contentAfter3 = {
-            transform: 'translate(' + 3 * contentWidth + 'px,0px) scale(0.95)',
-            opacity: 0.1
-        };
+    GalleryView.prototype._slideshowSpacing = function (opts) {
+        opts = opts || {};
 
+        if (opts.translate) {
+            return;
+        }
+
+        var adjacentContentEls = this.$el.find('.content-before, .content-after, .content-active');
+        if (!adjacentContentEls.length) {
+            return;
+        }
+
+        var contentSize = this._getContentSize();
+        var beforeTranslateX = contentSize.width * -1;
+        var afterTranslateX = contentSize.width;
+
+        var contentBefore1 = adjacentContentEls.filter('.content-before-1');
+        if (contentBefore1.length) {
+            var contentActiveEl = adjacentContentEls.filter('.content-active')[0];
+            var width = contentBefore1[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentBefore1.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (contentActiveEl.getBoundingClientRect().width - width)/2  : beforeTranslateX;
+            GALLERY_CSS.contentBefore1.transforms.translateX = beforeTranslateX+'px';
+            beforeTranslateX = beforeTranslateX - width;
+        }
+        var contentBefore2 = adjacentContentEls.filter('.content-before-2');
+        if (contentBefore2.length) {
+            var width = contentBefore2[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentBefore2.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+            GALLERY_CSS.contentBefore2.transforms.translateX = beforeTranslateX+'px';
+            beforeTranslateX = beforeTranslateX - width;
+        }
+        var contentBefore3 = adjacentContentEls.filter('.content-before-3');
+        if (contentBefore3.length) {
+            var width = contentBefore3[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentBefore3.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+            GALLERY_CSS.contentBefore3.transforms.translateX = beforeTranslateX+'px';
+            beforeTranslateX = beforeTranslateX - width;
+        }
+        var contentAfter1 = adjacentContentEls.filter('.content-after-1');
+        if (contentAfter1.length) {
+            var contentActiveEl = adjacentContentEls.filter('.content-active')[0];
+            var width = contentAfter1[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentAfter1.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (contentActiveEl.getBoundingClientRect().width - width)/2  : afterTranslateX;
+            GALLERY_CSS.contentAfter1.transforms.translateX = afterTranslateX +'px';
+            afterTranslateX = afterTranslateX + width;
+        }
+        var contentAfter2 = adjacentContentEls.filter('.content-after-2');
+        if (contentAfter2.length) {
+            var width = contentAfter2[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentAfter2.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+            GALLERY_CSS.contentAfter2.transforms.translateX = afterTranslateX+'px';
+            afterTranslateX = afterTranslateX + width;
+        }
+        var contentAfter3 = adjacentContentEls.filter('.content-after-3');
+        if (contentAfter3.length) {
+            var width = contentAfter3[0].getBoundingClientRect().width;
+            GALLERY_CSS.contentAfter3.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+            GALLERY_CSS.contentAfter3.transforms.translateX = afterTranslateX+'px';
+            afterTranslateX = afterTranslateX + width;
+        }
+        this._updateStyleEl(opts.translate);
+
+        return GALLERY_CSS;
+    };
+
+    GalleryView.prototype._updateStyleEl = function (translate) {
+        translate = translate === undefined ? true : translate;
+        for (var style in GALLERY_CSS) {
+            var transform = '';
+            for (var t in GALLERY_CSS[style].transforms) {
+                if (translate || style == 'contentBefore' || style == 'contentAfter' || (!translate && t.indexOf('translate') == -1)) {
+                    transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
+                }
+            }
+            GALLERY_CSS[style].transform = transform;
+        }
         var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
         for (var i=0; i < matches.length; i++) {
@@ -211,35 +311,7 @@ define([
             styleInnerHtml = styleInnerHtml.slice(0, idx) + 
                 this._id + styleInnerHtml.slice(idx);
         }
-        GALLERY_THEME_STYLE_EL.remove();
-        GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
-    };
 
-    GalleryView.prototype._fullscreenSpacing = function (contentWidth) {
-        FULLSCREEN_CSS.contentBefore1 = {
-            transform: 'translateX('+ -contentWidth/2 +'px) rotateY(-30deg) translateX('+ -contentWidth/2 +'px)',
-            opacity: 0.7
-        };
-        FULLSCREEN_CSS.contentBefore2 = {
-            transform: 'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
-            opacity: 0.02
-        };
-        FULLSCREEN_CSS.contentAfter1 = {
-            transform: 'translateX('+ contentWidth/2 +'px) rotateY(30deg) translateX('+ contentWidth/2 +'px)',
-            opacity: 0.7
-        };
-        FULLSCREEN_CSS.contentAfter2 = {
-            transform: 'translateX('+ contentWidth +'px) rotateY(52deg) translateX('+ contentWidth +'px)',
-            opacity: 0.02
-        };
-
-        var styleInnerHtml = ThemeCssTemplate(FULLSCREEN_CSS);
-        var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
-        for (var i=0; i < matches.length; i++) {
-            var idx = styleInnerHtml.indexOf(matches[i]);
-            styleInnerHtml = styleInnerHtml.slice(0, idx) + 
-                this._id + styleInnerHtml.slice(idx);
-        }
         GALLERY_THEME_STYLE_EL.remove();
         GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };

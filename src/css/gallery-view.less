@@ -1,0 +1,54 @@
+.streamhub-horizontal-list-view.streamhub-gallery-view {
+    position: static; 
+    width: 100%; 
+    overflow: hidden;
+    -webkit-perspective: 600px; 
+    -moz-perspective: 600px; 
+    -ms-perspective: 600px; 
+    -o-perspective: 600px; 
+    perspective: 600px;
+    // A hack to fix a bug in Firefox
+    // where CSS3 translate3d flows out of 
+    // parent container with overflow:hidden
+    // http://stackoverflow.com/a/16294191
+    background: transparent;
+    opacity:0.99;
+}
+
+.streamhub-gallery-view {
+    .content-container { 
+        opacity: 0.3; 
+        position: absolute; 
+        top: 50%; 
+        left: 50%; 
+        margin-bottom: 0; 
+    }
+
+    .content-with-image {
+        padding-bottom: 100%;
+        height: 0;
+        
+        .content-body {
+            display: none;
+        }
+
+        .content-meta,
+        .content-actions {
+            position: relative;
+            bottom: 15px;
+        }
+    }
+
+    .content-width-image[data-content-id=2] {
+        padding-bottom: 50%;
+        height: 0;
+    }
+}
+
+.animate .content-container {
+    -webkit-transition: -webkit-transform 0.7s ease, opacity 0.7s ease; 
+    -moz-transition: -moz-transform 0.7s ease, opacity 0.7s ease;
+    -ms-transition: -ms-transform 0.7s ease, opacity 0.7s ease; 
+    -o-transition: -o-transform 0.7s ease, opacity 0.7s ease; 
+    transition: transform 0.7s ease, opacity 0.7s ease; 
+}

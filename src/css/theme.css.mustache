@@ -11,7 +11,7 @@
 
 {{#contentAfter}}
 .streamhub-gallery-view .content-after {
-    opacity: {{#contentAfter.opacity}}{{ contentAfter.opacity }}{{/contentAfter.opacity}}{{^contentAfter.opacity}}0{{/contentAfter.opacity}};
+    opacity: {{#contentAfter.opacity}}{{ contentAfter.opacity }}{{/contentAfter.opacity}}{{^contentAfter.opacity}}1{{/contentAfter.opacity}};
     -webkit-transform: {{ contentAfter.transform }};
     -moz-transform: {{ contentAfter.transform }};
     -ms-transform: {{ contentAfter.transform }};
@@ -20,6 +20,7 @@
 }
 {{/contentAfter}}
 
+{{#contentAfter1.transform}}
 .streamhub-gallery-view .content-active {
     opacity: {{#contentActive.opacity}}{{ contentActive.opacity }}{{/contentActive.opacity}}{{^contentActive.opacity}}1{{/contentActive.opacity}};
     -webkit-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
@@ -28,8 +29,9 @@
     -o-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
     transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
 }
+{{/contentAfter1.transform}}
 
-{{#contentBefore1}}
+{{#contentBefore1.transform}}
 .streamhub-gallery-view .content-before-1 {
     opacity: {{ contentBefore1.opacity }};
     -webkit-transform: {{ contentBefore1.transform }};
@@ -38,9 +40,9 @@
     -o-transform: {{ contentBefore1.transform }};
     transform: {{ contentBefore1.transform }};
 }
-{{/contentBefore1}}
+{{/contentBefore1.transform}}
 
-{{#contentBefore2}}
+{{#contentBefore2.transform}}
 .streamhub-gallery-view .content-before-2 {
     opacity: {{ contentBefore2.opacity }};
     -webkit-transform: {{ contentBefore2.transform }};
@@ -49,9 +51,9 @@
     -o-transform: {{ contentBefore2.transform }};
     transform: {{ contentBefore2.transform }};
 }
-{{/contentBefore2}}
+{{/contentBefore2.transform}}
 
-{{#contentBefore3}}
+{{#contentBefore3.transform}}
 .streamhub-gallery-view .content-before-3 {
     opacity: {{ contentBefore3.opacity }};
     -webkit-transform: {{ contentBefore3.transform }};
@@ -60,9 +62,9 @@
     -o-transform: {{ contentBefore3.transform }};
     transform: {{ contentBefore3.transform }};
 }
-{{/contentBefore3}}
+{{/contentBefore3.transform}}
 
-{{#contentAfter1}}
+{{#contentAfter1.transform}}
 .streamhub-gallery-view .content-after-1 {
     opacity: {{ contentAfter1.opacity }};
     -webkit-transform: {{ contentAfter1.transform }};
@@ -71,9 +73,9 @@
     -o-transform: {{ contentAfter1.transform }};
     transform: {{ contentAfter1.transform }};
 }
-{{/contentAfter1}}
+{{/contentAfter1.transform}}
 
-{{#contentAfter2}}
+{{#contentAfter2.transform}}
 .streamhub-gallery-view .content-after-2 {
     opacity: {{ contentAfter2.opacity }};
     -webkit-transform: {{ contentAfter2.transform }};
@@ -82,9 +84,9 @@
     -o-transform: {{ contentAfter2.transform }};
     transform: {{ contentAfter2.transform }};
 }
-{{/contentAfter2}}
+{{/contentAfter2.transform}}
 
-{{#contentAfter3}}
+{{#contentAfter3.transform}}
 .streamhub-gallery-view .content-after-3 {
     opacity: {{ contentAfter3.opacity }};
     -webkit-transform: {{ contentAfter3.transform }};
@@ -93,4 +95,4 @@
     -o-transform: {{ contentAfter3.transform }};
     transform: {{ contentAfter3.transform }};
 }
-{{/contentAfter3}}
+{{/contentAfter3.transform}}
