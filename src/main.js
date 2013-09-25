@@ -226,9 +226,9 @@ define([
         var contentWithImageEls = this.$el.find('.content-with-image');
         for (var i=0; i < contentWithImageEls.length; i++) {
             var contentEl = contentWithImageEls.eq(i).closest('.content-container');
-            contentEl.width(contentSize.height + 'px');
-            contentEl.height(contentSize.height + 'px');
             contentEl.css({
+                'width': contentSize.height + 'px',
+                'height': contentSize.height + 'px',
                 'margin-left': contentSize.height/-2 + 'px',
                 'margin-top': contentSize.height/-2 + 'px'
             });
@@ -256,7 +256,8 @@ define([
         }
 
         var contentActiveEl = adjacentContentEls.filter('.content-active');
-        var activeSize = { width: contentActiveEl.outerWidth(), height: contentActiveEl.outerHeight() }
+        var activeElSize = contentActiveEl[0].getBoundingClientRect();
+        var activeSize = { width: activeElSize.width, height: activeElSize.height }
         var beforeTranslateX = activeSize.width * -1;
         var afterTranslateX = activeSize.width;
 
