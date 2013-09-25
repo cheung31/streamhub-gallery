@@ -13,13 +13,13 @@ define([
         contentBefore: {
             transforms: {
                 translateX: '-9999px',
-                scale: 0.7
+                scale: 0.8
             }
         },
         contentAfter: {
             transforms: {
                 translateX: '9999px',
-                scale: 0.7
+                scale: 0.8
             }
         }
     };
