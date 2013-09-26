@@ -262,48 +262,52 @@ define([
         var afterTranslateX = activeSize.width;
 
         var contentBefore1 = adjacentContentEls.filter('.content-before-1');
+        var contentBefore1Width;
         if (contentBefore1.length) {
-            var width = contentBefore1[0].getBoundingClientRect().width;
+            contentBefore1Width = contentBefore1[0].getBoundingClientRect().width;
             GALLERY_CSS.contentBefore1.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (contentActiveEl[0].getBoundingClientRect().width - width)/2  : beforeTranslateX;
+            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (activeSize.width - contentBefore1Width)/2  : beforeTranslateX;
             GALLERY_CSS.contentBefore1.transforms.translateX = beforeTranslateX+'px';
-            beforeTranslateX = beforeTranslateX - width;
         }
         var contentBefore2 = adjacentContentEls.filter('.content-before-2');
+        var contentBefore2Width;
         if (contentBefore2.length) {
-            var width = contentBefore2[0].getBoundingClientRect().width;
+            contentBefore2Width = contentBefore2[0].getBoundingClientRect().width;
             GALLERY_CSS.contentBefore2.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+            beforeTranslateX = beforeTranslateX - contentBefore1Width - (contentBefore2Width - contentBefore1Width)/2
             GALLERY_CSS.contentBefore2.transforms.translateX = beforeTranslateX+'px';
-            beforeTranslateX = beforeTranslateX - width;
         }
         var contentBefore3 = adjacentContentEls.filter('.content-before-3');
+        var contentBefore3Width;
         if (contentBefore3.length) {
-            var width = contentBefore3[0].getBoundingClientRect().width;
+            contentBefore3Width = contentBefore3[0].getBoundingClientRect().width;
             GALLERY_CSS.contentBefore3.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+            beforeTranslateX = beforeTranslateX - contentBefore2Width - (contentBefore3Width - contentBefore2Width)/2
             GALLERY_CSS.contentBefore3.transforms.translateX = beforeTranslateX+'px';
-            beforeTranslateX = beforeTranslateX - width;
         }
         var contentAfter1 = adjacentContentEls.filter('.content-after-1');
+        var contentAfter1Width;
         if (contentAfter1.length) {
-            var width = contentAfter1[0].getBoundingClientRect().width;
+            contentAfter1Width = contentAfter1[0].getBoundingClientRect().width;
             GALLERY_CSS.contentAfter1.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (contentActiveEl[0].getBoundingClientRect().width - width)/2  : afterTranslateX;
+            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (activeSize.width - contentAfter1Width)/2  : afterTranslateX;
             GALLERY_CSS.contentAfter1.transforms.translateX = afterTranslateX +'px';
-            afterTranslateX = afterTranslateX + width;
         }
         var contentAfter2 = adjacentContentEls.filter('.content-after-2');
+        var contentAfter2Width;
         if (contentAfter2.length) {
-            var width = contentAfter2[0].getBoundingClientRect().width;
+            contentAfter2Width =  contentAfter2[0].getBoundingClientRect().width;
             GALLERY_CSS.contentAfter2.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+            afterTranslateX = afterTranslateX + contentAfter1Width + (contentAfter2Width - contentAfter1Width)/2
             GALLERY_CSS.contentAfter2.transforms.translateX = afterTranslateX+'px';
-            afterTranslateX = afterTranslateX + width;
         }
         var contentAfter3 = adjacentContentEls.filter('.content-after-3');
+        var contentAfter3Width;
         if (contentAfter3.length) {
-            var width = contentAfter3[0].getBoundingClientRect().width;
+            contentAfter3Width = contentAfter3[0].getBoundingClientRect().width;
             GALLERY_CSS.contentAfter3.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+            afterTranslateX = afterTranslateX + contentAfter2Width + (contentAfter3Width - contentAfter2Width)/2
             GALLERY_CSS.contentAfter3.transforms.translateX = afterTranslateX+'px';
-            afterTranslateX = afterTranslateX + width;
         }
         this._updateStyleEl(opts.translate);
 
