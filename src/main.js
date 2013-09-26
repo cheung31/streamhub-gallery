@@ -1,10 +1,9 @@
 define([
     'streamhub-gallery/horizontal-list-view',
-    'streamhub-gallery/content-view-factory',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/util'
-], function (HorizontalListView, ContentViewFactory, GalleryViewCss, ThemeCssTemplate, util) {
+], function (HorizontalListView, GalleryViewCss, ThemeCssTemplate, util) {
 
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
@@ -36,8 +35,6 @@ define([
 
         this._fullscreen = opts.fullscreen || false;
         this._activeContentView = null;
-        this.contentViewFactory = new ContentViewFactory();
-
         HorizontalListView.call(this, opts);
 
         this._id = this.galleryListViewClassName + '-' + new Date().getTime();
@@ -76,7 +73,6 @@ define([
                 }
             }
 
-            //self.focus({ contentView: targetContentView });
             var activeIndex = self.contentViews.indexOf(self._activeContentView);
             var targetIndex = self.contentViews.indexOf(targetContentView);
             if (targetIndex > activeIndex) {
@@ -226,12 +222,18 @@ define([
         var contentWithImageEls = this.$el.find('.content-with-image');
         for (var i=0; i < contentWithImageEls.length; i++) {
             var contentEl = contentWithImageEls.eq(i).closest('.content-container');
-            contentEl.css({
-                'width': contentSize.height + 'px',
-                'height': contentSize.height + 'px',
-                'margin-left': contentSize.height/-2 + 'px',
-                'margin-top': contentSize.height/-2 + 'px'
-            });
+            if (contentEl.find('.content-attachment-video').length) {
+                contentEl.find('.content, .content-attachment').css({
+                    'padding-bottom': 1/this._aspectRatio * 100 + '%',
+                });
+            } else {
+                contentEl.css({
+                    'width': contentSize.height + 'px',
+                    'height': contentSize.height + 'px',
+                    'margin-left': contentSize.height/-2 + 'px',
+                    'margin-top': contentSize.height/-2 + 'px'
+                });
+            }
         }
 
         return this._adjustContentSpacing(opts);

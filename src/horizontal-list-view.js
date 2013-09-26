@@ -1,8 +1,9 @@
 define([
     'streamhub-sdk/views/list-view',
+    'streamhub-gallery/content-view-factory',
     'text!streamhub-gallery/css/horizontal-list-view.css',
     'streamhub-sdk/util'
-], function (ListView, HorizontalListViewCss, util) {
+], function (ListView, HorizontalContentViewFactory, HorizontalListViewCss, util) {
 
     var STYLE_EL;
 
@@ -11,6 +12,7 @@ define([
         this._id = 'streamhub-horizontal-list-'+new Date().getTime();
         this._aspectRatio = opts.aspectRatio || 16/9;
 
+        opts.contentViewFactory = new HorizontalContentViewFactory();
         ListView.call(this, opts);
 
         if (!STYLE_EL) {
