@@ -31,7 +31,8 @@ define([
 
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.modal = opts.modal || false;
+        opts.modal = opts.modal || true;
+        opts.aspectRatio = opts.aspectRatio || 16/9;
 
         this._fullscreen = opts.fullscreen || false;
         this._activeContentView = null;
@@ -219,6 +220,8 @@ define([
         styleEl.html(styles);
         $('head').append(styleEl);
 
+        // Make content with tiled attachments square except when there's a
+        // video attachment
         var contentWithImageEls = this.$el.find('.content-with-image');
         for (var i=0; i < contentWithImageEls.length; i++) {
             var contentEl = contentWithImageEls.eq(i).closest('.content-container');
