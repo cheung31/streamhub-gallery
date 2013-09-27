@@ -12,13 +12,13 @@ define([
         contentBefore: {
             transforms: {
                 translateX: '-9999px',
-                scale: 0.8
+                scale: 0.45
             }
         },
         contentAfter: {
             transforms: {
                 translateX: '9999px',
-                scale: 0.8
+                scale: 0.45
             }
         }
     };
@@ -132,11 +132,14 @@ define([
         this.focus({
             contentView: originalActiveContentView
         });
-        this.$el.addClass('animate');
-        this.focus({
-            translate: newTransforms,
-            contentView: targetContentView
-        });
+        var self = this;
+        setTimeout(function() {
+            self.$el.addClass('animate');
+            self.focus({
+                translate: newTransforms,
+                contentView: targetContentView
+            });
+        },1);
     };
 
     GalleryView.prototype.prev = function () {
@@ -151,11 +154,14 @@ define([
         this.focus({
             contentView: originalActiveContentView
         });
-        this.$el.addClass('animate');
-        this.focus({
-            translate: newTransforms,
-            contentView: targetContentView
-        });
+        var self = this;
+        setTimeout(function() {
+            self.$el.addClass('animate');
+            self.focus({
+                translate: newTransforms,
+                contentView: targetContentView
+            });
+        },1);
     };
 
     GalleryView.prototype.focus = function (opts) {
