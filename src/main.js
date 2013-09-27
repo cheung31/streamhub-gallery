@@ -34,7 +34,6 @@ define([
         opts.modal = opts.modal || true;
         opts.aspectRatio = opts.aspectRatio || 16/9;
 
-        this._fullscreen = opts.fullscreen || false;
         this._activeContentView = null;
         HorizontalListView.call(this, opts);
 
@@ -111,13 +110,6 @@ define([
         }
 
         this.focus();
-    };
-
-    GalleryView.prototype.fullscreen = function (off) {
-        return;
-        var contentSize = this._getContentSize();
-        off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
-        this._fullscreen = off === undefined ? true : !!off;
     };
 
     GalleryView.prototype.next = function () {
@@ -249,7 +241,7 @@ define([
     };
 
     GalleryView.prototype._adjustContentSpacing = function (opts) {
-        return this._fullscreen ? this._fullscreenSpacing(opts) : this._slideshowSpacing(opts);
+        return this._slideshowSpacing(opts);
     };
 
     GalleryView.prototype._slideshowSpacing = function (opts) {
