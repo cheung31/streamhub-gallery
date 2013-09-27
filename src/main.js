@@ -254,6 +254,7 @@ define([
 
     GalleryView.prototype._slideshowSpacing = function (opts) {
         opts = opts || {};
+        var visibleAdjacentContent = 3;
 
         if (opts.translate) {
             GALLERY_CSS = opts.translate;
@@ -266,60 +267,36 @@ define([
             return;
         }
 
-        var contentActiveEl = adjacentContentEls.filter('.content-active');
-        var activeElSize = contentActiveEl[0].getBoundingClientRect();
-        var activeSize = { width: activeElSize.width, height: activeElSize.height }
-        var beforeTranslateX = activeSize.width * -1;
-        var afterTranslateX = activeSize.width;
+        var beforeTranslateX = 0;
+        var afterTranslateX = 0;
+        for (var i=0; i < visibleAdjacentContent; i++) {
+            var adjacentIndex = i+1;
 
-        var contentBefore1 = adjacentContentEls.filter('.content-before-1');
-        var contentBefore1Width;
-        if (contentBefore1.length) {
-            contentBefore1Width = contentBefore1[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentBefore1.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-            beforeTranslateX = GALLERY_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (activeSize.width - contentBefore1Width)/2  : beforeTranslateX;
-            GALLERY_CSS.contentBefore1.transforms.translateX = beforeTranslateX+'px';
+            // Before
+            var contentBefore = adjacentContentEls.filter('.content-before-'+adjacentIndex);
+            var contentBeforeWidth;
+            if (contentBefore.length) {
+                GALLERY_CSS['contentBefore'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+                contentBeforeWidth = contentBefore[0].getBoundingClientRect().width;
+                var previousEl = contentBefore.next();
+                var previousWidth = previousEl[0].getBoundingClientRect().width;
+                beforeTranslateX = beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
+                GALLERY_CSS['contentBefore'+adjacentIndex].transforms.translateX = beforeTranslateX+'px';
+            }
+
+            // After
+            var contentAfter = adjacentContentEls.filter('.content-after-'+adjacentIndex);
+            var contentAfterWidth;
+            if (contentAfter.length) {
+                GALLERY_CSS['contentAfter'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+                contentAfterWidth = contentAfter[0].getBoundingClientRect().width;
+                var previousEl = contentAfter.prev();
+                var previousWidth = previousEl[0].getBoundingClientRect().width;
+                afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2
+                GALLERY_CSS['contentAfter'+adjacentIndex].transforms.translateX = afterTranslateX+'px';
+            }
         }
-        var contentBefore2 = adjacentContentEls.filter('.content-before-2');
-        var contentBefore2Width;
-        if (contentBefore2.length) {
-            contentBefore2Width = contentBefore2[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentBefore2.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-            beforeTranslateX = beforeTranslateX - contentBefore1Width - (contentBefore2Width - contentBefore1Width)/2
-            GALLERY_CSS.contentBefore2.transforms.translateX = beforeTranslateX+'px';
-        }
-        var contentBefore3 = adjacentContentEls.filter('.content-before-3');
-        var contentBefore3Width;
-        if (contentBefore3.length) {
-            contentBefore3Width = contentBefore3[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentBefore3.transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-            beforeTranslateX = beforeTranslateX - contentBefore2Width - (contentBefore3Width - contentBefore2Width)/2
-            GALLERY_CSS.contentBefore3.transforms.translateX = beforeTranslateX+'px';
-        }
-        var contentAfter1 = adjacentContentEls.filter('.content-after-1');
-        var contentAfter1Width;
-        if (contentAfter1.length) {
-            contentAfter1Width = contentAfter1[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentAfter1.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-            afterTranslateX = GALLERY_CSS.contentAfter1.transforms.scale ? afterTranslateX - (activeSize.width - contentAfter1Width)/2  : afterTranslateX;
-            GALLERY_CSS.contentAfter1.transforms.translateX = afterTranslateX +'px';
-        }
-        var contentAfter2 = adjacentContentEls.filter('.content-after-2');
-        var contentAfter2Width;
-        if (contentAfter2.length) {
-            contentAfter2Width =  contentAfter2[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentAfter2.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-            afterTranslateX = afterTranslateX + contentAfter1Width + (contentAfter2Width - contentAfter1Width)/2
-            GALLERY_CSS.contentAfter2.transforms.translateX = afterTranslateX+'px';
-        }
-        var contentAfter3 = adjacentContentEls.filter('.content-after-3');
-        var contentAfter3Width;
-        if (contentAfter3.length) {
-            contentAfter3Width = contentAfter3[0].getBoundingClientRect().width;
-            GALLERY_CSS.contentAfter3.transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-            afterTranslateX = afterTranslateX + contentAfter2Width + (contentAfter3Width - contentAfter2Width)/2
-            GALLERY_CSS.contentAfter3.transforms.translateX = afterTranslateX+'px';
-        }
+
         this._updateStyleEl(opts.translate);
 
         return GALLERY_CSS;
