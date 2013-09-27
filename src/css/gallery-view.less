@@ -1,5 +1,5 @@
 .streamhub-horizontal-list-view.streamhub-gallery-view {
-    position: static; 
+    position: absolute; 
     width: 100%; 
     overflow: hidden;
     -webkit-perspective: 600px; 
@@ -7,12 +7,6 @@
     -ms-perspective: 600px; 
     -o-perspective: 600px; 
     perspective: 600px;
-    // A hack to fix a bug in Firefox
-    // where CSS3 translate3d flows out of 
-    // parent container with overflow:hidden
-    // http://stackoverflow.com/a/16294191
-    background: transparent;
-    opacity:0.99;
 
     .content-container { 
         position: absolute; 
