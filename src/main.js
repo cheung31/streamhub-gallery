@@ -8,18 +8,17 @@ define([
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
 
-    var GALLERY_CSS = {
-        contentBefore: {
-            transforms: {
-                translateX: '-9999px',
-                scale: 0.8
-            }
-        },
-        contentAfter: {
-            transforms: {
-                translateX: '9999px',
-                scale: 0.8
-            }
+    var GALLERY_CSS = {};
+    GALLERY_CSS.contentBefore = {
+        transforms: {
+            translateX: '-9999px',
+            scale: 0.8
+        }
+    };
+    GALLERY_CSS.contentAfter = {
+        transforms: {
+            translateX: '9999px',
+            scale: 0.8
         }
     };
     GALLERY_CSS.contentBefore1 = { opacity: 0.7 };
@@ -29,9 +28,27 @@ define([
     GALLERY_CSS.contentAfter2 = { opacity: 0.3 };
     GALLERY_CSS.contentAfter3 = { opacity: 0.1 };
 
+    var FULLSCREEN_CSS = {};
+    FULLSCREEN_CSS.contentBefore = {
+        transforms: {
+            translateX: '-1000px',
+            rotateY: '-72deg'
+        }
+    };
+    FULLSCREEN_CSS.contentAfter = {
+        transforms: {
+            translateX: '1000px',
+            rotateY: '72deg'
+        }
+    };
+    FULLSCREEN_CSS.contentBefore1 = { opacity: 0.7 };
+    FULLSCREEN_CSS.contentBefore2 = { opacity: 0.3 };
+    FULLSCREEN_CSS.contentAfter1 = { opacity: 0.7 };
+    FULLSCREEN_CSS.contentAfter2 = { opacity: 0.3 };
+
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.modal = opts.modal || true;
+        opts.autoplay = opts.autoplay || true;
         opts.aspectRatio = opts.aspectRatio || 16/9;
 
         this._fullscreen = opts.fullscreen || false;
@@ -113,13 +130,6 @@ define([
         this.focus();
     };
 
-    GalleryView.prototype.fullscreen = function (off) {
-        return;
-        var contentSize = this._getContentSize();
-        off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
-        this._fullscreen = off === undefined ? true : !!off;
-    };
-
     GalleryView.prototype.next = function () {
         this.$el.removeClass('animate');
         var originalActiveContentView = this._activeContentView;
@@ -193,6 +203,12 @@ define([
         var after3 = after2.next().addClass('content-after-3');
 
         return this._adjustContentSize(opts);
+    };
+
+    GalleryView.prototype.fullscreen = function (off) {
+        var contentSize = this._getContentSize();
+        off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
+        this._fullscreen = off === undefined ? true : !!off;
     };
 
     GalleryView.prototype._getContentSize = function () {
@@ -319,18 +335,106 @@ define([
         return GALLERY_CSS;
     };
 
+    GalleryView.prototype._fullscreenSpacing = function (opts) {
+        opts = opts || {};
+
+        if (opts.translate) {
+            FULLSCREEN_CSS = opts.translate;
+            this._updateStyleEl(opts.translate);
+            return;
+        }
+
+        var adjacentContentEls = this.$el.find('.content-before, .content-after, .content-active');
+        if (!adjacentContentEls.length) {
+            return;
+        }
+
+        var contentActiveEl = adjacentContentEls.filter('.content-active');
+        var activeElSize = contentActiveEl[0].getBoundingClientRect();
+        var activeSize = { width: activeElSize.width, height: activeElSize.height }
+        var beforeTranslateX = activeSize.width * -1;
+        var afterTranslateX = activeSize.width;
+
+        FULLSCREEN_CSS.contentBefore1 = {
+            transforms: {
+                translateX: -activeElSize.width/2 +'px',
+                rotateY: '-30deg',
+                translateX: -activeElSize.width/2 +'px'
+            },
+            opacity: 0.7
+        };
+        FULLSCREEN_CSS.contentBefore2 = {
+            transforms: {
+                translateX: -activeElSize.width + 'px',
+                rotateY: '-52deg',
+                translateX: -activeElSize.width + 'px'
+            },
+            opacity: 0.02
+        };
+        FULLSCREEN_CSS.contentAfter1 = {
+            transforms: {
+                translateX: activeElSize.width/2 +'px',
+                rotateY: '30deg',
+                translateX: activeElSize.width/2 +'px'
+            },
+            opacity: 0.7
+        };
+        FULLSCREEN_CSS.contentAfter2 = {
+            transform: {
+                translateX: activeElSize.width +'px',
+                rotateY: '52deg',
+                translateX: activeElSize.width +'px'
+            },
+            opacity: 0.02
+        };
+
+        var contentBefore1 = adjacentContentEls.filter('.content-before-1');
+        var contentBefore1Width;
+        if (contentBefore1.length) {
+            contentBefore1Width = contentBefore1[0].getBoundingClientRect().width;
+            beforeTranslateX = FULLSCREEN_CSS.contentBefore1.transforms.scale ? beforeTranslateX + (activeSize.width - contentBefore1Width)/2  : beforeTranslateX;
+            FULLSCREEN_CSS.contentBefore1.transforms.translateX = beforeTranslateX+'px';
+        }
+        var contentBefore2 = adjacentContentEls.filter('.content-before-2');
+        var contentBefore2Width;
+        if (contentBefore2.length) {
+            contentBefore2Width = contentBefore2[0].getBoundingClientRect().width;
+            beforeTranslateX = beforeTranslateX - contentBefore1Width - (contentBefore2Width - contentBefore1Width)/2
+            FULLSCREEN_CSS.contentBefore2.transforms.translateX = beforeTranslateX+'px';
+        }
+        var contentAfter1 = adjacentContentEls.filter('.content-after-1');
+        var contentAfter1Width;
+        if (contentAfter1.length) {
+            contentAfter1Width = contentAfter1[0].getBoundingClientRect().width;
+            afterTranslateX = FULLSCREEN_CSS.contentAfter1.transforms.scale ? afterTranslateX - (activeSize.width - contentAfter1Width)/2  : afterTranslateX;
+            FULLSCREEN_CSS.contentAfter1.transforms.translateX = afterTranslateX +'px';
+        }
+        var contentAfter2 = adjacentContentEls.filter('.content-after-2');
+        var contentAfter2Width;
+        if (contentAfter2.length) {
+            contentAfter2Width =  contentAfter2[0].getBoundingClientRect().width;
+            afterTranslateX = afterTranslateX + contentAfter1Width + (contentAfter2Width - contentAfter1Width)/2
+            FULLSCREEN_CSS.contentAfter2.transforms.translateX = afterTranslateX+'px';
+        }
+        this._updateStyleEl(opts.translate);
+
+        return FULLSCREEN_CSS;
+    };
+
     GalleryView.prototype._updateStyleEl = function (translate) {
         translate = translate === undefined ? true : translate;
-        for (var style in GALLERY_CSS) {
+        var css = this._fullscreen ? FULLSCREEN_CSS : GALLERY_CSS
+        for (var style in css) {
             var transform = '';
-            for (var t in GALLERY_CSS[style].transforms) {
+            for (var t in css[style].transforms) {
                 if (translate || style == 'contentBefore' || style == 'contentAfter' || (!translate && t.indexOf('translate') == -1)) {
-                    transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
+                    transform = transform + t + '(' + css[style].transforms[t]  + ') ';
                 }
             }
-            GALLERY_CSS[style].transform = transform;
+            css[style].transform = transform;
         }
-        var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
+        console.log(css);
+        var styleInnerHtml = ThemeCssTemplate(css);
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
         for (var i=0; i < matches.length; i++) {
             var idx = styleInnerHtml.indexOf(matches[i]);
