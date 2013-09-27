@@ -72,14 +72,7 @@ define([
                     break;
                 }
             }
-
-            var activeIndex = self.contentViews.indexOf(self._activeContentView);
-            var targetIndex = self.contentViews.indexOf(targetContentView);
-            if (targetIndex > activeIndex) {
-                self.next();
-            } else if (targetIndex < activeIndex) {
-                self.prev();
-            }
+            self.jump(targetContentView);
         });
 
         this.$el.on('imageLoaded.hub', function (e) {
@@ -112,14 +105,12 @@ define([
         this.focus();
     };
 
-    GalleryView.prototype.next = function () {
+    GalleryView.prototype.jump = function (contentView) {
         this.$el.removeClass('animate');
         var originalActiveContentView = this._activeContentView;
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
         var newTransforms = $.extend(true, {}, this.focus({
             translate: false,
-            contentView: targetContentView
+            contentView: contentView
         }));
         this.focus({
             contentView: originalActiveContentView
@@ -129,31 +120,21 @@ define([
             self.$el.addClass('animate');
             self.focus({
                 translate: newTransforms,
-                contentView: targetContentView
+                contentView: contentView
             });
         },1);
     };
 
+    GalleryView.prototype.next = function () {
+        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
+        this.jump(targetContentView);
+    };
+
     GalleryView.prototype.prev = function () {
-        this.$el.removeClass('animate');
-        var originalActiveContentView = this._activeContentView;
         var activeIndex = this.contentViews.indexOf(this._activeContentView);
         var targetContentView = this.contentViews[activeIndex-1 || 0];
-        var newTransforms = $.extend(true, {}, this.focus({
-            translate: false,
-            contentView: targetContentView
-        }));
-        this.focus({
-            contentView: originalActiveContentView
-        });
-        var self = this;
-        setTimeout(function() {
-            self.$el.addClass('animate');
-            self.focus({
-                translate: newTransforms,
-                contentView: targetContentView
-            });
-        },1);
+        this.jump(targetContentView);
     };
 
     GalleryView.prototype.focus = function (opts) {
