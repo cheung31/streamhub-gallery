@@ -1,82 +1,62 @@
 define([
     'streamhub-gallery/horizontal-list-view',
+    'text!streamhub-gallery/css/gallery-view.css',
+    'hgn!streamhub-gallery/templates/gallery-view',
+    'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/util'
-], function (HorizontalListView, util) {
+], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, util) {
 
-    var STYLE_EL;
-    var CSS = ".streamhub-horizontal-list-view.streamhub-gallery-view { \
-        position: static; \
-        width: 100%; \
-        overflow: hidden; \
-        -webkit-perspective: 600px; \
-        -moz-perspective: 600px; \
-        -ms-perspective: 600px; \
-        -o-perspective: 600px; \
-        perspective: 600px; } \
-    .streamhub-gallery-view .content-active { \
-        z-index: 1; \
-        opacity: 1; } \
-    .streamhub-gallery-view .content-container { \
-        opacity: 0; \
-        position: absolute; \
-        top: 50%; \
-        left: 50%; \
-        margin-bottom: 0; \
-        -webkit-transition: -webkit-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -moz-transition: -moz-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -ms-transition: -ms-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        -o-transition: -o-transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; \
-        transition: transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease; }";
+    var STYLE_EL,
+        GALLERY_THEME_STYLE_EL = $('<style></style>');
 
-    var GALLERY_STYLE_EL;
-    var GALLERY_CSS = ".content-before { \
-        -webkit-transform: translate(-9999px, 0px) scale(0.95); \
-        -moz-transform: translate(-9999px, 0px) scale(0.95); \
-        -ms-transform: translate(-9999px, 0px) scale(0.95); \
-        -o-transform: translate(-9999px, 0px) scale(0.95); \
-        transform: translate(-9999px, 0px) scale(0.95); } \
-    .content-after { \
-        -webkit-transform: translate(1920px, 0px) scale(0.95); \
-        -moz-transform: translate(1920px, 0px) scale(0.95); \
-        -ms-transform: translate(1920px, 0px) scale(0.95); \
-        -o-transform: translate(1920px, 0px) scale(0.95); \
-        transform: translate(1920px, 0px) scale(0.95); }";
-
-    var FULLSCREEN_CSS = ".content-before { \
-        -webkit-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -moz-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -ms-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        -o-transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); \
-        transform: translateX(-980px) rotateY(-72deg) translateX(-1290px); } \
-    .content-after { \
-        -webkit-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -moz-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -ms-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        -o-transform: translateX(980px) rotateY(72deg) translateX(1290px); \
-        transform: translateX(980px) rotateY(72deg) translateX(1290px); }";
+    var GALLERY_CSS = {
+        contentBefore: {
+            transforms: {
+                translateX: '-9999px',
+                scale: 0.45
+            }
+        },
+        contentAfter: {
+            transforms: {
+                translateX: '9999px',
+                scale: 0.45
+            }
+        }
+    };
+    GALLERY_CSS.contentBefore1 = { opacity: 0.7 };
+    GALLERY_CSS.contentBefore2 = { opacity: 0.3 };
+    GALLERY_CSS.contentBefore3 = { opacity: 0.1 };
+    GALLERY_CSS.contentAfter1 = { opacity: 0.7 };
+    GALLERY_CSS.contentAfter2 = { opacity: 0.3 };
+    GALLERY_CSS.contentAfter3 = { opacity: 0.1 };
 
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.modal = false;
-        this._fullscreen = opts.fullscreen || false;
-
-        HorizontalListView.call(this, opts);
+        opts.modal = opts.modal || true;
+        opts.aspectRatio = opts.aspectRatio || 16/9;
 
         this._activeContentView = null;
+        this._newContentCount = 0;
+        HorizontalListView.call(this, opts);
 
-        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
-        if (!STYLE_EL && opts.css) {
-            STYLE_EL = $('<style></style>').text(CSS).prependTo('head');
+        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
+
+        if (!STYLE_EL) {
+            STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
         }
     };
     util.inherits(GalleryView, HorizontalListView);
 
+    GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
 
     GalleryView.prototype.setElement = function (el) {
-        HorizontalListView.prototype.setElement.call(this, el);
-        var self = this;
+        var galleryViewEl = $(this.template());
+        this.el = galleryViewEl.filter('.'+this.galleryListViewClassName);
+        HorizontalListView.prototype.setElement.call(this, this.el);
+        galleryViewEl.appendTo(el);
 
+        var self = this;
         this.$el.on('focusContent.hub', function (e) {
             var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
             if ($(contentEl).parent().hasClass('content-before') || $(contentEl).parent().hasClass('content-after')) {
@@ -96,9 +76,52 @@ define([
                     break;
                 }
             }
-            self.focus({ contentView: targetContentView });
+            self.jump(targetContentView);
         });
-        this.$el.addClass(this.galleryListViewClassName);
+
+        $('.streamhub-gallery-view-prev > .streamhub-gallery-view-page-button').on('click', function (e) {
+            e.preventDefault();
+            self.prev();
+        });
+
+        $('.streamhub-gallery-view-next > .streamhub-gallery-view-page-button').on('click', function (e) {
+            e.preventDefault();
+            self.next();
+        });
+
+        $('.streamhub-gallery-view-notification').on('click', function (e) {
+            e.preventDefault();
+            // Jump to head when the notification is clicked
+            self.jump(self.contentViews[0]);
+            self._hideNewNotification();
+        });
+
+        this.$el.on('imageLoaded.hub', function (e) {
+            self._adjustContentSize();
+        });
+    };
+
+    GalleryView.prototype.add = function (content) {
+        var contentView = HorizontalListView.prototype.add.call(this, content);
+        // If there is new content and we're not focused at the head, show notification
+        if (this.contentViews.indexOf(this._activeContentView) == 0) {
+            return;
+        }
+        this._newContentCount++;
+        this._showNewNotification();
+        return contentView;
+    };
+
+    GalleryView.prototype._showNewNotification = function () {
+        var notificationEl = $('.streamhub-gallery-view-notification');
+        notificationEl.html(this._newContentCount);
+        notificationEl.fadeIn();
+    };
+
+    GalleryView.prototype._hideNewNotification = function () {
+        var notificationEl = $('.streamhub-gallery-view-notification');
+        this._newContentCount = 0;
+        notificationEl.fadeOut();
     };
 
     GalleryView.prototype._insert = function (contentView) {
@@ -124,10 +147,43 @@ define([
         this.focus();
     };
 
-    GalleryView.prototype.fullscreen = function (off) {
-        var contentSize = this._getContentSize();
-        off || off === undefined ? this._fullscreenSpacing(contentSize.width): this._slideshowSpacing(contentSize.width);
-        this._fullscreen = !!off;
+    GalleryView.prototype.jump = function (contentView) {
+        var contentViewIndex = this.contentViews.indexOf(contentView);
+        if (contentViewIndex == 0) {
+            newContentCount = 0;
+        }
+        this.$el.removeClass('animate');
+        var originalActiveContentView = this._activeContentView;
+        // Apply transforms exclusive of translations to calculate spacing
+        var newTransforms = $.extend(true, {}, this.focus({
+            translate: false,
+            contentView: contentView
+        }));
+        // Revert to original state of spacing
+        this.focus({
+            contentView: originalActiveContentView
+        });
+        // Apply calculated transforms to original state
+        var self = this;
+        setTimeout(function () {
+            self.$el.addClass('animate');
+            self.focus({
+                translate: newTransforms,
+                contentView: contentView
+            });
+        },1);
+    };
+
+    GalleryView.prototype.next = function () {
+        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
+        this.jump(targetContentView);
+    };
+
+    GalleryView.prototype.prev = function () {
+        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var targetContentView = this.contentViews[activeIndex-1 || 0];
+        this.jump(targetContentView);
     };
 
     GalleryView.prototype.focus = function (opts) {
@@ -164,32 +220,23 @@ define([
         var after2 = after1.next().addClass('content-after-2');
         var after3 = after2.next().addClass('content-after-3');
 
-        this._adjustContentSize();
-    };
-
-    GalleryView.prototype.next = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        this.focus({ contentView: this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)] });
-    };
-
-    GalleryView.prototype.prev = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        this.focus({ contentView: this.contentViews[activeIndex-1 || 0] });
+        return this._adjustContentSize(opts);
     };
 
     GalleryView.prototype._getContentSize = function () {
-        var containerHeight = this.$el.height();
         var containerWidth = this.$el.width();
-        var contentWidth = Math.min(containerHeight * this._aspectRatio, containerWidth);
+        var contentHeight = this.$el.height();
+        var contentWidth = Math.min(contentHeight * this._aspectRatio, containerWidth);
 
         if (contentWidth == containerWidth) {
-            contentWidth = contentWidth * 0.8;
+            contentHeight = contentHeight * 0.8;
+            contentWidth = contentHeight * this._aspectRatio;
         }
 
-        return { width: contentWidth, height: contentWidth / this._aspectRatio };
+        return { width: contentWidth, height: contentHeight };
     };
 
-    GalleryView.prototype._adjustContentSize = function () {
+    GalleryView.prototype._adjustContentSize = function (opts) {
         var styleEl = $('style.'+this._id);
         if (styleEl) {
             styleEl.remove();
@@ -199,123 +246,106 @@ define([
         var styles = '';
         var contentSize = this._getContentSize();
         styles = '.'+this.horizontalListViewClassName + ' .'+this.contentContainerClassName + ' { width: ' + contentSize.width + 'px; height: ' + contentSize.height + 'px; margin-left: '+ contentSize.width/-2 + 'px; margin-top: '+ contentSize.height/-2+ 'px; }';
-
-        this._adjustContentSpacing(contentSize.width);
-
         styleEl.html(styles);
         $('head').append(styleEl);
-        return styleEl;
-    };
 
-    function getTransformCssObject(value, otherCss) {
-        var transformProperties = [
-            'transform',
-            '-webkit-transform',
-            '-moz-transform',
-            '-ms-transform',
-            '-o-transform'
-        ];
-        var obj = {};
-        otherCss = otherCss || {};
-        for (var property in transformProperties) {
-            obj[transformProperties[property]] = value;
-        }
-        return $.extend(otherCss, obj);
-    }
-
-    GalleryView.prototype._adjustContentSpacing = function (contentWidth) {
-        this._fullscreen ? this._fullscreenSpacing(contentWidth) : this._slideshowSpacing(contentWidth);
-    };
-
-    GalleryView.prototype._slideshowSpacing = function (contentWidth) {
-        if (! GALLERY_STYLE_EL) {
-            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(GALLERY_CSS).appendTo('head'); }, 700);
-        } else {
-            GALLERY_STYLE_EL.remove();
-            GALLERY_STYLE_EL = $('<style></style>').text(GALLERY_CSS).appendTo('head');
-        }
-        this.$el.find('.content-active').css(
-            getTransformCssObject(
-                'translate(0px,0px)',
-                {'opacity': 1}
-            )
-        );
-        this.$el.find('.content-before-1').css(
-            getTransformCssObject(
-                'translate(' + -1 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-before-2').css(
-            getTransformCssObject(
-                'translate(' + -2 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.3}
-            )
-        );
-        this.$el.find('.content-before-3').css(
-            getTransformCssObject(
-                'translate(' + -3 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.1}
-            )
-        );
-        this.$el.find('.content-after-1').css(
-            getTransformCssObject(
-                'translate(' + 1 * contentWidth + 'px,0px) scale(0.95)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-after-2').css(
-            getTransformCssObject(
-                'translate(' + 2 * contentWidth + 'px, 0px) scale(0.95)',
-                {'opacity': 0.3}
-            )
-        );
-        this.$el.find('.content-after-3').css(
-            getTransformCssObject(
-                'translate(' + 3 * contentWidth + 'px, 0px) scale(0.95)',
-                {'opacity': 0.1}
-            )
-        );
-    };
-
-    GalleryView.prototype._fullscreenSpacing = function (contentWidth) {
-        if (! GALLERY_STYLE_EL) {
-            setTimeout(function () { GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head'); }, 700);
-        } else {
-            GALLERY_STYLE_EL.remove();
-            GALLERY_STYLE_EL = $('<style></style>').text(FULLSCREEN_CSS).appendTo('head');
+        // Make content with tiled attachments square except when there's a
+        // video attachment
+        var contentWithImageEls = this.$el.find('.content-with-image');
+        for (var i=0; i < contentWithImageEls.length; i++) {
+            var contentEl = contentWithImageEls.eq(i).closest('.content-container');
+            if (contentEl.find('.content-attachment-video').length) {
+                contentEl.find('.content, .content-attachment').css({
+                    'padding-bottom': 1/this._aspectRatio * 100 + '%',
+                });
+            } else {
+                contentEl.css({
+                    'width': contentSize.height + 'px',
+                    'height': contentSize.height + 'px',
+                    'margin-left': contentSize.height/-2 + 'px',
+                    'margin-top': contentSize.height/-2 + 'px'
+                });
+            }
         }
 
-        this.$el.find('.content-active').css(
-            getTransformCssObject(
-                'translate(0px,0px)',
-                {'opacity': 1}
-            )
-        );
-        this.$el.find('.content-before-1').css(
-            getTransformCssObject(
-                'translateX('+ -contentWidth/2 +'px) rotateY(-30deg) translateX('+-contentWidth/2+'px)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-before-2').css(
-            getTransformCssObject(
-                'translateX('+ -contentWidth + 'px) rotateY(-52deg) translateX(' + -contentWidth + 'px)',
-                {'opacity': 0.02}
-            )
-        );
-        this.$el.find('.content-after-1').css(
-            getTransformCssObject(
-                'translateX('+contentWidth/2+'px) rotateY(30deg) translateX('+contentWidth/2+'px)',
-                {'opacity': 0.7}
-            )
-        );
-        this.$el.find('.content-after-2').css(
-            getTransformCssObject(
-                'translateX('+contentWidth+'px) rotateY(52deg) translateX('+contentWidth+'px)',
-                {'opacity': 0.02}
-            )
-        );
+        return this._adjustContentSpacing(opts);
+    };
+
+    GalleryView.prototype._adjustContentSpacing = function (opts) {
+        return this._slideshowSpacing(opts);
+    };
+
+    GalleryView.prototype._slideshowSpacing = function (opts) {
+        opts = opts || {};
+        var visibleAdjacentContent = 3;
+
+        if (opts.translate) {
+            GALLERY_CSS = opts.translate;
+            this._updateStyleEl(opts.translate);
+            return;
+        }
+
+        var adjacentContentEls = this.$el.find('.content-before, .content-after, .content-active');
+        if (!adjacentContentEls.length) {
+            return;
+        }
+
+        var beforeTranslateX = 0;
+        var afterTranslateX = 0;
+        for (var i=0; i < visibleAdjacentContent; i++) {
+            var adjacentIndex = i+1;
+
+            // Before
+            var contentBefore = adjacentContentEls.filter('.content-before-'+adjacentIndex);
+            var contentBeforeWidth;
+            if (contentBefore.length) {
+                GALLERY_CSS['contentBefore'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
+                contentBeforeWidth = contentBefore[0].getBoundingClientRect().width;
+                var previousEl = contentBefore.next();
+                var previousWidth = previousEl[0].getBoundingClientRect().width;
+                beforeTranslateX = beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
+                GALLERY_CSS['contentBefore'+adjacentIndex].transforms.translateX = beforeTranslateX+'px';
+            }
+
+            // After
+            var contentAfter = adjacentContentEls.filter('.content-after-'+adjacentIndex);
+            var contentAfterWidth;
+            if (contentAfter.length) {
+                GALLERY_CSS['contentAfter'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
+                contentAfterWidth = contentAfter[0].getBoundingClientRect().width;
+                var previousEl = contentAfter.prev();
+                var previousWidth = previousEl[0].getBoundingClientRect().width;
+                afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2
+                GALLERY_CSS['contentAfter'+adjacentIndex].transforms.translateX = afterTranslateX+'px';
+            }
+        }
+
+        this._updateStyleEl(opts.translate);
+
+        return GALLERY_CSS;
+    };
+
+    GalleryView.prototype._updateStyleEl = function (translate) {
+        translate = translate === undefined ? true : translate;
+        for (var style in GALLERY_CSS) {
+            var transform = '';
+            for (var t in GALLERY_CSS[style].transforms) {
+                if (translate || style == 'contentBefore' || style == 'contentAfter' || (!translate && t.indexOf('translate') == -1)) {
+                    transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
+                }
+            }
+            GALLERY_CSS[style].transform = transform;
+        }
+        var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
+        var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
+        for (var i=0; i < matches.length; i++) {
+            var idx = styleInnerHtml.indexOf(matches[i]);
+            styleInnerHtml = styleInnerHtml.slice(0, idx) + 
+                this._id + styleInnerHtml.slice(idx);
+        }
+
+        GALLERY_THEME_STYLE_EL.remove();
+        GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
 
     return GalleryView;
