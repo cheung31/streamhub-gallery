@@ -12,13 +12,11 @@ define([
             it ("with no options", function () {
                 var view = new GalleryView();
                 expect(view).toBeDefined();
-                expect(view.modal).toBe(false);
             });
 
             it("accepts the opts.modal option", function () {
                 var view = new GalleryView({ modal: true });
                 expect(view).toBeDefined();
-                expect(view.modal).toBe(true);
             });
         });
 
@@ -117,36 +115,6 @@ define([
                 spyOn(view, '_adjustContentSize');
                 view.focus();
                 expect(view._adjustContentSize).toHaveBeenCalled();
-            });
-        });
-
-        // fullscreen
-        describe('can enable fullscreen mode', function () {
-
-            var view,
-                myEl;
-
-            beforeEach(function () {
-                view = new GalleryView();
-            });
-
-            it('calculates the content size (calls ._getContentSize)', function () {
-                spyOn(view, '_getContentSize').andReturn({ width: 300, height: 300 });
-                view.fullscreen();
-                expect(view._getContentSize).toHaveBeenCalled();
-            });
-
-            it('adjusts content item spacing (calls ._fullscreenSpacing)', function () {
-                spyOn(view, '_fullscreenSpacing');
-                spyOn(view, '_slideshowSpacing');
-                view.fullscreen();
-                expect(view._fullscreenSpacing).toHaveBeenCalled();
-                expect(view._slideshowSpacing).not.toHaveBeenCalled();
-            });
-
-            it('sets ._fullscreen to true', function () {
-                view.fullscreen();
-                expect(view._fullscreen).toBe(true);
             });
         });
 
