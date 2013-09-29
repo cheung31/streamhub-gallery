@@ -79,12 +79,12 @@ define([
             self.jump(targetContentView);
         });
 
-        $('.streamhub-gallery-view-prev').on('click', function (e) {
+        $('.streamhub-gallery-view-prev > .streamhub-gallery-view-page-button').on('click', function (e) {
             e.preventDefault();
             self.prev();
         });
 
-        $('.streamhub-gallery-view-next').on('click', function (e) {
+        $('.streamhub-gallery-view-next > .streamhub-gallery-view-page-button').on('click', function (e) {
             e.preventDefault();
             self.next();
         });
@@ -120,6 +120,7 @@ define([
 
     GalleryView.prototype._hideNewNotification = function () {
         var notificationEl = $('.streamhub-gallery-view-notification');
+        this._newContentCount = 0;
         notificationEl.fadeOut();
     };
 
@@ -223,15 +224,16 @@ define([
     };
 
     GalleryView.prototype._getContentSize = function () {
-        var containerHeight = this.$el.height();
         var containerWidth = this.$el.width();
-        var contentWidth = Math.min(containerHeight * this._aspectRatio, containerWidth);
+        var contentHeight = this.$el.height();
+        var contentWidth = Math.min(contentHeight * this._aspectRatio, containerWidth);
 
         if (contentWidth == containerWidth) {
-            contentWidth = contentWidth * 0.8;
+            contentHeight = contentHeight * 0.8;
+            contentWidth = contentHeight * this._aspectRatio;
         }
 
-        return { width: contentWidth, height: contentWidth / this._aspectRatio };
+        return { width: contentWidth, height: contentHeight };
     };
 
     GalleryView.prototype._adjustContentSize = function (opts) {
