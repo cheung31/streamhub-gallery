@@ -36,16 +36,27 @@
                 //,fullscreen: true
                 //,modal: false
             });
-           
-            var opts = {
-                "network": "labs-t402.fyre.co",
-                "siteId": "303827",
-                "articleId": "labs_demo_basketball",
-                "environment": "t402.livefyre.com"
-            };
 
-            var livefyreStreams = window.streamManager = Hub.StreamManager.create.livefyreStreams(opts)
-            livefyreStreams.bind(view).start();
+            var streams = new StreamManager({
+                main: new MockAttachmentsStream()
+            });
+            
+            /* Uncomment to filter out content without attachments
+            livefyreStreams.on('readable', function (stream) {
+                var content = stream.read();
+                // Add now if there are attachments
+                if (content.attachments.length) {
+                    return view.add(content);
+                }
+                // If no attachments yet, if one is added, then show in wall
+                content.on('attachment', function () {
+                    console.log('attach', content.attachments);
+                    view.add(content);
+                });
+            });
+            */
+
+            streams.bind(view).start();
         });
         </script>
     </body>

@@ -1,4 +1,5 @@
 requirejs.config({
+  baseUrl: '/',
   paths: {
     jquery: 'lib/jquery/jquery',
 	jasmine: 'lib/jasmine/lib/jasmine-core/jasmine',
@@ -9,7 +10,6 @@ requirejs.config({
     hogan: 'lib/hogan/web/builds/2.0.0/hogan-2.0.0.amd',
     json: 'lib/requirejs-plugins/src/json',
     base64: 'lib/base64/base64',
-    bespoke: 'lib/bespoke/src/bespoke'
   },
   packages: [{
     name: 'streamhub-sdk',
@@ -27,9 +27,6 @@ requirejs.config({
   }
   ],
   shim: {
-    bespoke: {
-      exports: 'bespoke'
-    },
     jasmine: {
       exports: 'jasmine'
     },
