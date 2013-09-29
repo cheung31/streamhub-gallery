@@ -1,9 +1,10 @@
 define([
     'streamhub-gallery/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
+    'hgn!streamhub-gallery/templates/gallery-view',
     'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/util'
-], function (HorizontalListView, GalleryViewCss, ThemeCssTemplate, util) {
+], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, util) {
 
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
@@ -35,6 +36,7 @@ define([
         opts.aspectRatio = opts.aspectRatio || 16/9;
 
         this._activeContentView = null;
+        this._newContentCount = 0;
         HorizontalListView.call(this, opts);
 
         this._id = this.galleryListViewClassName + '-' + new Date().getTime();
@@ -45,14 +47,16 @@ define([
     };
     util.inherits(GalleryView, HorizontalListView);
 
+    GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
 
     GalleryView.prototype.setElement = function (el) {
-        this.el = document.createElement('div');
+        var galleryViewEl = $(this.template());
+        this.el = galleryViewEl.filter('.'+this.galleryListViewClassName);
         HorizontalListView.prototype.setElement.call(this, this.el);
-        $(this.el).appendTo(el);
-        var self = this;
+        galleryViewEl.appendTo(el);
 
+        var self = this;
         this.$el.on('focusContent.hub', function (e) {
             var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
             if ($(contentEl).parent().hasClass('content-before') || $(contentEl).parent().hasClass('content-after')) {
@@ -75,11 +79,48 @@ define([
             self.jump(targetContentView);
         });
 
+        $('.streamhub-gallery-view-prev').on('click', function (e) {
+            e.preventDefault();
+            self.prev();
+        });
+
+        $('.streamhub-gallery-view-next').on('click', function (e) {
+            e.preventDefault();
+            self.next();
+        });
+
+        $('.streamhub-gallery-view-notification').on('click', function (e) {
+            e.preventDefault();
+            // Jump to head when the notification is clicked
+            self.jump(self.contentViews[0]);
+            self._hideNewNotification();
+        });
+
         this.$el.on('imageLoaded.hub', function (e) {
             self._adjustContentSize();
         });
+    };
 
-        this.$el.addClass(this.galleryListViewClassName);
+    GalleryView.prototype.add = function (content) {
+        var contentView = HorizontalListView.prototype.add.call(this, content);
+        // If there is new content and we're not focused at the head, show notification
+        if (this.contentViews.indexOf(this._activeContentView) == 0) {
+            return;
+        }
+        this._newContentCount++;
+        this._showNewNotification();
+        return contentView;
+    };
+
+    GalleryView.prototype._showNewNotification = function () {
+        var notificationEl = $('.streamhub-gallery-view-notification');
+        notificationEl.html(this._newContentCount);
+        notificationEl.fadeIn();
+    };
+
+    GalleryView.prototype._hideNewNotification = function () {
+        var notificationEl = $('.streamhub-gallery-view-notification');
+        notificationEl.fadeOut();
     };
 
     GalleryView.prototype._insert = function (contentView) {
@@ -106,17 +147,24 @@ define([
     };
 
     GalleryView.prototype.jump = function (contentView) {
+        var contentViewIndex = this.contentViews.indexOf(contentView);
+        if (contentViewIndex == 0) {
+            newContentCount = 0;
+        }
         this.$el.removeClass('animate');
         var originalActiveContentView = this._activeContentView;
+        // Apply transforms exclusive of translations to calculate spacing
         var newTransforms = $.extend(true, {}, this.focus({
             translate: false,
             contentView: contentView
         }));
+        // Revert to original state of spacing
         this.focus({
             contentView: originalActiveContentView
         });
+        // Apply calculated transforms to original state
         var self = this;
-        setTimeout(function() {
+        setTimeout(function () {
             self.$el.addClass('animate');
             self.focus({
                 translate: newTransforms,
