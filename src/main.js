@@ -32,7 +32,6 @@ define([
 
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.modal = opts.modal || true;
         opts.aspectRatio = opts.aspectRatio || 16/9;
 
         this._activeContentView = null;
@@ -53,18 +52,17 @@ define([
     GalleryView.prototype.setElement = function (el) {
         var galleryViewEl = $(this.template());
         this.el = galleryViewEl.filter('.'+this.galleryListViewClassName);
-        HorizontalListView.prototype.setElement.call(this, this.el);
         galleryViewEl.appendTo(el);
 
         var self = this;
-        this.$el.on('focusContent.hub', function (e) {
+        $(this.el).on('focusContent.hub', function (e) {
             var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
             if ($(contentEl).parent().hasClass('content-before') || $(contentEl).parent().hasClass('content-after')) {
                 e.stopImmediatePropagation();
             }
         });
 
-        this.$el.on('click', '.content-before, .content-after', function (e) {
+        $(this.el).on('click', '.content-before, .content-after', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -77,6 +75,14 @@ define([
                 }
             }
             self.jump(targetContentView);
+        });
+
+        $(this.el).on('imageLoaded.hub', function (e) {
+            self._adjustContentSize();
+        });
+
+        $(this.el).on('jumpToHead.hub', function (e) {
+            self._hideNewNotification();
         });
 
         $('.streamhub-gallery-view-prev > .streamhub-gallery-view-page-button').on('click', function (e) {
@@ -93,12 +99,9 @@ define([
             e.preventDefault();
             // Jump to head when the notification is clicked
             self.jump(self.contentViews[0]);
-            self._hideNewNotification();
         });
 
-        this.$el.on('imageLoaded.hub', function (e) {
-            self._adjustContentSize();
-        });
+        HorizontalListView.prototype.setElement.call(this, this.el);
     };
 
     GalleryView.prototype.add = function (content) {
@@ -151,6 +154,7 @@ define([
         var contentViewIndex = this.contentViews.indexOf(contentView);
         if (contentViewIndex == 0) {
             newContentCount = 0;
+            this.$el.trigger('jumpToHead.hub');
         }
         this.$el.removeClass('animate');
         var originalActiveContentView = this._activeContentView;

@@ -11,7 +11,7 @@ function (BaseFacebookContentView, FacebookContentTemplate, inherits) {
      * @constructor
      */
     var FacebookContentView = function FacebookContentView (opts) {
-        BaseContentView.call(this, opts);
+        BaseFacebookContentView.call(this, opts);
     };
     inherits(FacebookContentView, BaseFacebookContentView);
     
