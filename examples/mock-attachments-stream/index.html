@@ -29,7 +29,7 @@
             'streamhub-sdk-tests/mocks/mock-attachments-stream',
             'streamhub-sdk/stream-manager'
         ],function (Hub, GalleryView, MockAttachmentsStream, StreamManager) {
-
+            window.Hub = Hub;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3

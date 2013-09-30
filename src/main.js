@@ -114,7 +114,7 @@ define([
 
     GalleryView.prototype._showNewNotification = function () {
         var notificationEl = $('.streamhub-gallery-view-notification');
-        notificationEl.html(this._newContentCount);
+        notificationEl.find('.streamhub-gallery-view-notification-count').html(this._newContentCount);
         notificationEl.fadeIn();
     };
 
