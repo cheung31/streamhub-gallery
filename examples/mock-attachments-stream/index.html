@@ -26,9 +26,8 @@
         require([
             'streamhub-sdk',
             'streamhub-gallery',
-            'streamhub-sdk-tests/mocks/mock-attachments-stream',
-            'streamhub-sdk/stream-manager'
-        ],function (Hub, GalleryView, MockAttachmentsStream, StreamManager) {
+            'streamhub-sdk-tests/mocks/mock-attachments-stream'
+        ],function (Hub, GalleryView, MockAttachmentsStream) {
             window.Hub = Hub;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
@@ -37,26 +36,7 @@
                 //,modal: false
             });
 
-            var streams = new StreamManager({
-                main: new MockAttachmentsStream()
-            });
-            
-            /* Uncomment to filter out content without attachments
-            livefyreStreams.on('readable', function (stream) {
-                var content = stream.read();
-                // Add now if there are attachments
-                if (content.attachments.length) {
-                    return view.add(content);
-                }
-                // If no attachments yet, if one is added, then show in wall
-                content.on('attachment', function () {
-                    console.log('attach', content.attachments);
-                    view.add(content);
-                });
-            });
-            */
-
-            streams.bind(view).start();
+            (new MockAttachmentsStream()).pipe(view);
         });
         </script>
     </body>

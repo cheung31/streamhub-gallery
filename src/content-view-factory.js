@@ -1,5 +1,5 @@
 define([
-    'streamhub-sdk/content/content',
+    'streamhub-sdk/content',
     'streamhub-sdk/content/types/livefyre-content',
     'streamhub-sdk/content/types/livefyre-twitter-content',
     'streamhub-sdk/content/types/livefyre-facebook-content',
@@ -10,7 +10,7 @@ define([
     'streamhub-gallery/content/views/twitter-content-view',
     'streamhub-gallery/content/views/facebook-content-view',
     'streamhub-gallery/content/views/instagram-content-view',
-    'streamhub-sdk/util'
+    'inherits'
 ], function(
     Content,
     LivefyreContent,
@@ -23,7 +23,7 @@ define([
     TwitterContentView,
     FacebookContentView,
     InstagramContentView,
-    util
+    inherits
 ) {
 
     /**
@@ -35,7 +35,7 @@ define([
         opts = opts || {};
         BaseContentViewFactory.call(this, opts);
     };
-    util.inherits(ContentViewFactory, BaseContentViewFactory);
+    inherits(ContentViewFactory, BaseContentViewFactory);
 
     /**
      * The default registry for Content -> ContentView rendering.

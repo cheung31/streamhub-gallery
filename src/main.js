@@ -3,8 +3,8 @@ define([
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
     'hgn!streamhub-gallery/css/theme.css',
-    'streamhub-sdk/util'
-], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, util) {
+    'inherits'
+], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, inherits) {
 
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
@@ -45,7 +45,7 @@ define([
             STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
         }
     };
-    util.inherits(GalleryView, HorizontalListView);
+    inherits(GalleryView, HorizontalListView);
 
     GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';

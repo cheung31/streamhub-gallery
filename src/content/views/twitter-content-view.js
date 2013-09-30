@@ -1,8 +1,8 @@
 define([
     'streamhub-sdk/content/views/twitter-content-view',
     'hgn!streamhub-gallery/content/templates/twitter',
-    'streamhub-sdk/util'],
-function (BaseTwitterContentView, TwitterContentTemplate, util) {
+    'inherits'],
+function (BaseTwitterContentView, TwitterContentTemplate, inherits) {
     
     /**
      * A view for rendering twitter content into an element.
@@ -14,7 +14,7 @@ function (BaseTwitterContentView, TwitterContentTemplate, util) {
     var TwitterContentView = function (opts) {
         BaseTwitterContentView.call(this, opts);
     };
-    util.inherits(TwitterContentView, BaseTwitterContentView); 
+    inherits(TwitterContentView, BaseTwitterContentView); 
     
     TwitterContentView.prototype.template = TwitterContentTemplate;
 

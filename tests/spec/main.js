@@ -1,6 +1,6 @@
 define([
     'streamhub-gallery',
-    'streamhub-sdk/content/content',
+    'streamhub-sdk/content',
     'jasmine',
     'jasmine-jquery'
 ], function (GalleryView, Content) {

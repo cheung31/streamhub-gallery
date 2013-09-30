@@ -2,8 +2,8 @@ define([
     'streamhub-sdk/views/list-view',
     'streamhub-gallery/content-view-factory',
     'text!streamhub-gallery/css/horizontal-list-view.css',
-    'streamhub-sdk/util'
-], function (ListView, HorizontalContentViewFactory, HorizontalListViewCss, util) {
+    'inherits'
+], function (ListView, HorizontalContentViewFactory, HorizontalListViewCss, inherits) {
 
     var STYLE_EL;
 
@@ -25,7 +25,7 @@ define([
         });
         this._adjustContentSize();
     };
-    util.inherits(HorizontalListView, ListView);
+    inherits(HorizontalListView, ListView);
 
     HorizontalListView.prototype.horizontalListViewClassName = 'streamhub-horizontal-list-view';
     HorizontalListView.prototype.contentContainerClassName = 'content-container';
