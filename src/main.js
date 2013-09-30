@@ -228,8 +228,14 @@ define([
         var contentHeight = this.$el.height();
         var contentWidth = Math.min(contentHeight * this._aspectRatio, containerWidth);
 
-        if (contentWidth == containerWidth) {
+        if (contentWidth/containerWidth <= 0.9) {
+            contentHeight = contentHeight * 0.95;
+            contentWidth = contentHeight * this._aspectRatio;
+        } else if (contentWidth/containerWidth <= 0.95) {
             contentHeight = contentHeight * 0.8;
+            contentWidth = contentHeight * this._aspectRatio;
+        } else {
+            contentHeight = contentHeight * 0.5;
             contentWidth = contentHeight * this._aspectRatio;
         }
 
