@@ -274,10 +274,10 @@ define([
             }
         }
 
-        return this._adjustContentSpacing(opts);
+        return this._relayout(opts);
     };
 
-    GalleryView.prototype._adjustContentSpacing = function (opts) {
+    GalleryView.prototype._relayout = function (opts) {
         return this._slideshowSpacing(opts);
     };
 
