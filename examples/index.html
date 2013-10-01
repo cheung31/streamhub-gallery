@@ -25,11 +25,12 @@
         <script>
         require([
             'streamhub-sdk',
+            'streamhub-sdk/content',
+            'streamhub-sdk/collection',
             'streamhub-gallery',
-            'streamhub-sdk-tests/mocks/mock-attachments-stream',
-            'streamhub-sdk/stream-manager'
-        ],function (Hub, GalleryView, MockAttachmentsStream, StreamManager) {
-
+            'streamhub-sdk-tests/mocks/mock-attachments-stream'
+        ],function (Hub, Content, Collection, GalleryView, MockAttachmentsStream) {
+            window.Content = Content;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3
@@ -43,9 +44,9 @@
                 "articleId": "labs_demo_basketball",
                 "environment": "t402.livefyre.com"
             };
+            var collection = new Collection(opts);
 
-            var livefyreStreams = window.streamManager = Hub.StreamManager.create.livefyreStreams(opts)
-            livefyreStreams.bind(view).start();
+            collection.pipe(view);
         });
         </script>
     </body>
