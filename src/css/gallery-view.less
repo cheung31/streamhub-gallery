@@ -40,23 +40,35 @@
         max-height: 50px;
     }
 
+    .content-created-at a {
+        color: rgba(0,0,0,0.3);
+        font-size: 12px;
+        font-weight: normal;
+    }
+
     .content-with-image {
         padding-bottom: 100%;
         height: 0;
         background: #111;
         overflow: hidden;
+
+        a {
+            color: #FFF;
+        }
         
         .content-body {
             display: none;
         }
         
         .content-created-at {
-            color: white;
+            color: #FFF;
             text-shadow: 0 1px 3px #000;
-            font-weight: bold;
+            font-size: 12px;
+            font-weight: normal;
         }
 
         .content-footer {
+            color: #FFF;
             border-radius: 0 0 3px 3px;
             box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.25);
             background: -moz-linear-gradient(top,rgba(0,0,0,0) 0,rgba(0,0,0,0.8) 100%);
@@ -115,5 +127,3 @@
         text-align: center;
     }
 }
-
-
