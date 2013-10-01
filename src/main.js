@@ -203,7 +203,7 @@ define([
                 contentView: contentView
             });
             self._animating = false;
-        }, 500);
+        }, 100);
     };
 
     GalleryView.prototype.next = function () {
