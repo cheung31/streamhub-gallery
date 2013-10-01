@@ -24,11 +24,12 @@
         </script>
         <script>
         require([
-            'streamhub-sdk',
             'streamhub-gallery',
-            'streamhub-sdk-tests/mocks/mock-attachments-stream'
-        ],function (Hub, GalleryView, MockAttachmentsStream) {
-            window.Hub = Hub;
+            'streamhub-sdk/content',
+            'streamhub-sdk-tests/mocks/mock-attachments-stream',
+            'streamhub-sdk-tests/mocks/mock-stream'
+        ],function (GalleryView, Content, MockAttachmentsStream, MockStream) {
+            window.Content = Content;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3
@@ -36,7 +37,9 @@
                 //,modal: false
             });
 
-            (new MockAttachmentsStream()).pipe(view);
+            (new MockAttachmentsStream()).pipe(view, { end: false });
+            window.mockStream = new MockStream.LivefyreContent();
+            (window.mockStream).pipe(view.more);
         });
         </script>
     </body>

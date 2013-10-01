@@ -13,13 +13,13 @@ define([
         contentBefore: {
             transforms: {
                 translateX: '-9999px',
-                scale: 0.45
+                scale: 0.5
             }
         },
         contentAfter: {
             transforms: {
                 translateX: '9999px',
-                scale: 0.45
+                scale: 0.5
             }
         }
     };
@@ -34,9 +34,19 @@ define([
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
 
+        HorizontalListView.call(this, opts);
+        this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
+
         this._activeContentView = null;
         this._newContentCount = 0;
-        HorizontalListView.call(this, opts);
+        this._newQueue = this._createMoreStream(opts);
+        var self = this;
+        this._newQueue.on('readable', function () {
+            var content;
+            while (content = self._newQueue.read()) {
+                self.add(content);
+            }
+        });
 
         this._id = this.galleryListViewClassName + '-' + new Date().getTime();
 
@@ -49,20 +59,34 @@ define([
     GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
 
-    GalleryView.prototype.setElement = function (el) {
-        var galleryViewEl = $(this.template());
-        this.el = galleryViewEl.filter('.'+this.galleryListViewClassName);
-        galleryViewEl.appendTo(el);
+    /**
+     * @private
+     * Called automatically by the Writable base class when .write() is called
+     * @param content {Content} Content to display in the ListView
+     * @param requestMore {function} A function to call when done writing, so
+     *     that _write will be called again with more data
+     */
+    GalleryView.prototype._write = function (content, requestMore) {
+        this._newQueue.write(content);
 
+        // If there is new content and we're not focused at the head, show notification
+        if (this.contentViews.indexOf(this._activeContentView) != 0) {
+            this._newContentCount++;
+            this._showNewNotification();
+        }
+        requestMore();
+    };
+
+    GalleryView.prototype.setElement = function (el) {
         var self = this;
-        $(this.el).on('focusContent.hub', function (e) {
+        $(el).on('focusContent.hub', function (e) {
             var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
             if ($(contentEl).parent().hasClass('content-before') || $(contentEl).parent().hasClass('content-after')) {
                 e.stopImmediatePropagation();
             }
         });
 
-        $(this.el).on('click', '.content-before, .content-after', function (e) {
+        $(el).on('click', '.content-before, .content-after', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -77,47 +101,41 @@ define([
             self.jump(targetContentView);
         });
 
-        $(this.el).on('imageLoaded.hub', function (e) {
+        $(el).on('imageLoaded.hub', function (e) {
             self._adjustContentSize();
         });
 
-        $(this.el).on('jumpToHead.hub', function (e) {
+        $(el).on('jumpToHead.hub', function (e) {
             self._hideNewNotification();
         });
 
-        $('.streamhub-gallery-view-prev > .streamhub-gallery-view-page-button').on('click', function (e) {
-            e.preventDefault();
-            self.prev();
-        });
-
-        $('.streamhub-gallery-view-next > .streamhub-gallery-view-page-button').on('click', function (e) {
-            e.preventDefault();
-            self.next();
-        });
-
-        $('.streamhub-gallery-view-notification').on('click', function (e) {
+        $(el).find('.streamhub-gallery-view-notification').on('click', function (e) {
             e.preventDefault();
             // Jump to head when the notification is clicked
             self.jump(self.contentViews[0]);
         });
 
-        HorizontalListView.prototype.setElement.call(this, this.el);
+        HorizontalListView.prototype.setElement.call(this, el);
     };
 
     GalleryView.prototype.add = function (content) {
-        var contentView = HorizontalListView.prototype.add.call(this, content);
-        // If there is new content and we're not focused at the head, show notification
-        if (this.contentViews.indexOf(this._activeContentView) == 0) {
-            return;
+        var contentView = this.getContentView(content);
+        if (contentView) {
+            return contentView;
         }
-        this._newContentCount++;
-        this._showNewNotification();
+
+        if (! contentView) {
+            contentView = HorizontalListView.prototype.add.call(this, content);
+        }
+
         return contentView;
     };
 
     GalleryView.prototype._showNewNotification = function () {
         var notificationEl = $('.streamhub-gallery-view-notification');
-        notificationEl.find('.streamhub-gallery-view-notification-count').html(this._newContentCount);
+        notificationEl.find('.streamhub-gallery-view-notification-count').html(
+            this._newContentCount < 100 ? this._newContentCount : '99+'
+        );
         notificationEl.fadeIn();
     };
 
@@ -140,7 +158,7 @@ define([
 
         if (newContentViewIndex === 0) {
             // Beginning!
-            $wrappedEl.prependTo(this.el);
+            $wrappedEl.prependTo(this.$galleryEl);
         } else {
             // Find it's previous contentView and insert new contentView after
             $previousEl = this.contentViews[newContentViewIndex - 1].$el;
@@ -155,6 +173,11 @@ define([
         if (contentViewIndex == 0) {
             newContentCount = 0;
             this.$el.trigger('jumpToHead.hub');
+        } else if (contentViewIndex < this._newContentCount) {
+            this._newContentCount--;
+            this._showNewNotification();
+        } else if (contentViewIndex >= this.contentViews.length - 3) {
+            this.showMore(3);
         }
         this.$el.removeClass('animate');
         var originalActiveContentView = this._activeContentView;
@@ -356,6 +379,22 @@ define([
 
         GALLERY_THEME_STYLE_EL.remove();
         GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
+    };
+
+   /**
+    * @private
+    * Register listeners to the .more stream so that the items
+    * it reads out go somewhere useful.
+    * By default, this .add()s the items
+    */
+    GalleryView.prototype._pipeMore = function () {
+        var self = this;
+        this.more.on('readable', function () {
+            var content;
+            while (content = self.more.read()) {
+                self.add(content);
+            }
+        });
     };
 
     return GalleryView;
