@@ -132,7 +132,7 @@ define([
     };
 
     GalleryView.prototype._showNewNotification = function () {
-        var notificationEl = $('.streamhub-gallery-view-notification');
+        var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
         notificationEl.find('.streamhub-gallery-view-notification-count').html(
             this._newContentCount < 100 ? this._newContentCount : '99+'
         );
