@@ -1,10 +1,13 @@
 define([
-    'streamhub-gallery/horizontal-list-view',
+    'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
     'hgn!streamhub-gallery/css/theme.css',
+    'streamhub-sdk/debug',
     'inherits'
-], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, inherits) {
+], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, debug, inherits) {
+
+    var log = debug('streamhub-sdk/views/list-view');
 
     var STYLE_EL,
         GALLERY_THEME_STYLE_EL = $('<style></style>');
@@ -30,6 +33,15 @@ define([
     GALLERY_CSS.contentAfter2 = { opacity: 0.3 };
     GALLERY_CSS.contentAfter3 = { opacity: 0.1 };
 
+    /**
+     * A simple View that displays Content in a list (`<ul>` by default).
+     *
+     * @param opts {Object} A set of options to config the view with
+     * @param opts.el {HTMLElement} The element in which to render the streamed content
+     * @exports streamhub-gallery
+     * @augments streamhub-gallery/views/horizontal-list-view
+     * @constructor
+     */
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
@@ -79,6 +91,12 @@ define([
         requestMore();
     };
 
+    /**
+     * Set the element for the view to render in.
+     * You will probably want to call .render() after this, but not always.
+     * @param element {HTMLElement} The element to render this View in
+     * @return this
+     */
     GalleryView.prototype.setElement = function (el) {
         var self = this;
         $(el).on('focusContent.hub', function (e) {
@@ -122,6 +140,15 @@ define([
         HorizontalListView.prototype.setElement.call(this, el);
     };
 
+    /**
+     * Add a piece of Content to the ListView
+     *     .createContentView(content)
+     *     add newContentView to this.contentViews[]
+     *     render the newContentView
+     *     insert the newContentView into this.el according to this.comparator
+     * @param content {Content} A Content model to add to the ListView
+     * @returns the newly created ContentView
+     */
     GalleryView.prototype.add = function (content) {
         var contentView = this.getContentView(content);
         if (contentView) {
@@ -135,6 +162,13 @@ define([
         return contentView;
     };
 
+    /**
+     * @private
+     * Called automatically by the Writable base class when .write() is called
+     * @param content {Content} Content to display in the ListView
+     * @param requestMore {function} A function to call when done writing, so
+     *     that _write will be called again with more data
+     */
     GalleryView.prototype._showNewNotification = function () {
         var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
         notificationEl.find('.streamhub-gallery-view-notification-count').html(
@@ -143,6 +177,13 @@ define([
         notificationEl.fadeIn();
     };
 
+    /**
+     * @private
+     * Called automatically by the Writable base class when .write() is called
+     * @param content {Content} Content to display in the ListView
+     * @param requestMore {function} A function to call when done writing, so
+     *     that _write will be called again with more data
+     */
     GalleryView.prototype._hideNewNotification = function () {
         var notificationEl = $('.streamhub-gallery-view-notification');
         this._newContentCount = 0;
