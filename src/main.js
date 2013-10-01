@@ -40,6 +40,8 @@ define([
         this._activeContentView = null;
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
+        this._animating = false;
+
         var self = this;
         this._newQueue.on('readable', function () {
             var content;
@@ -102,7 +104,9 @@ define([
         });
 
         $(el).on('imageLoaded.hub', function (e) {
-            self._adjustContentSize();
+            if (! this._animating) {
+                self._adjustContentSize();
+            }
         });
 
         $(el).on('jumpToHead.hub', function (e) {
@@ -198,7 +202,8 @@ define([
                 translate: newTransforms,
                 contentView: contentView
             });
-        },1);
+            self._animating = false;
+        }, 500);
     };
 
     GalleryView.prototype.next = function () {
@@ -305,6 +310,7 @@ define([
     };
 
     GalleryView.prototype._relayout = function (opts) {
+        this._animating = true;
         return this._slideshowSpacing(opts);
     };
 
