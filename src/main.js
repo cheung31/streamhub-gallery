@@ -109,7 +109,7 @@ define([
             self._hideNewNotification();
         });
 
-        $(el).find('.streamhub-gallery-view-notification').on('click', function (e) {
+        $(el).on('click', '.streamhub-gallery-view-notification', function (e) {
             e.preventDefault();
             // Jump to head when the notification is clicked
             self.jump(self.contentViews[0]);
