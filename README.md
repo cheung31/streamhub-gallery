@@ -2,6 +2,8 @@
 
 streamhub-gallery is a [StreamHub App](http://apps.livefyre.com) that displays social content in a horizontal CoverFlow-like gallery.
 
+![Gallery View](http://i.imgur.com/HaBxIwp.png)
+
 ## Getting Started
 
 The quickest way to use streamhub-timeline is to use the built version hosted on Livefyre's CDN.
