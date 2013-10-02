@@ -54,6 +54,13 @@ define([
         this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
     };
 
+    /**
+     * @private
+     * Sets appropriate dimensions on each ContentView in the gallery.
+     * By default, a ContentViews new dimensions respects the gallery's specified aspect ratio.
+     * For content whose intrinsic apsect ratio is 1:1, it will retain a 1:1 aspect ratio.
+     * ContentViews with tiled attachments will also retain a 1:1 aspect ratio.
+     */
     HorizontalListView.prototype._adjustContentSize = function () {
         if (! this._aspectRatio) {
             return;
@@ -74,10 +81,26 @@ define([
         return styleEl;
     };
 
+    /**
+     * Add a piece of Content to the ListView
+     *     .createContentView(content)
+     *     add newContentView to this.contentViews[]
+     *     render the newContentView
+     *     insert the newContentView into this.el according to this.comparator
+     * @param content {Content} A Content model to add to the ListView
+     * @returns the newly created ContentView
+     */
     HorizontalListView.prototype.add = function (content) {
         ListView.prototype.add.call(this, content);
     };
 
+    /**
+     * @private
+     * Insert a contentView into the ListView's .el
+     * after being wrapped by a container element.
+     * Get insertion index based on this.comparator
+     * @param contentView {ContentView} The ContentView's element to insert to the DOM
+     */
     HorizontalListView.prototype._insert = function (contentView) {
         var newContentViewIndex,
             $previousEl;

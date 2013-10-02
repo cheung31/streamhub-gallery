@@ -1,11 +1,13 @@
 define([
+    'streamhub-sdk/jquery',
     'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
     'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/debug',
     'inherits'
-], function (HorizontalListView, GalleryViewCss, GalleryViewTemplate, ThemeCssTemplate, debug, inherits) {
+], function ($, HorizontalListView, GalleryViewCss, GalleryViewTemplate, themeCssTemplate, debug, inherits) {
+    'use strict';
 
     var log = debug('streamhub-sdk/views/list-view');
 
@@ -84,7 +86,7 @@ define([
         this._newQueue.write(content);
 
         // If there is new content and we're not focused at the head, show notification
-        if (this.contentViews.indexOf(this._activeContentView) != 0) {
+        if (this.contentViews.indexOf(this._activeContentView) !== 0) {
             this._newContentCount++;
             this._showNewNotification();
         }
@@ -164,10 +166,7 @@ define([
 
     /**
      * @private
-     * Called automatically by the Writable base class when .write() is called
-     * @param content {Content} Content to display in the ListView
-     * @param requestMore {function} A function to call when done writing, so
-     *     that _write will be called again with more data
+     * Display the new content notification
      */
     GalleryView.prototype._showNewNotification = function () {
         var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
@@ -177,12 +176,10 @@ define([
         notificationEl.fadeIn();
     };
 
+
     /**
      * @private
-     * Called automatically by the Writable base class when .write() is called
-     * @param content {Content} Content to display in the ListView
-     * @param requestMore {function} A function to call when done writing, so
-     *     that _write will be called again with more data
+     * Hide the new content notification
      */
     GalleryView.prototype._hideNewNotification = function () {
         var notificationEl = $('.streamhub-gallery-view-notification');
@@ -190,9 +187,15 @@ define([
         notificationEl.fadeOut();
     };
 
+    /**
+     * @private
+     * Insert a contentView into the ListView's .el
+     * after being wrapped by a container element.
+     * Get insertion index based on this.comparator
+     * @param contentView {ContentView} The ContentView's element to insert to the DOM
+     */
     GalleryView.prototype._insert = function (contentView) {
-        var self = this,
-            newContentViewIndex,
+        var newContentViewIndex,
             $previousEl;
 
         newContentViewIndex = this.contentViews.indexOf(contentView);
@@ -213,10 +216,14 @@ define([
         this.focus();
     };
 
+    /**
+     * Focus the gallery view to the specified ContentView
+     * @param contentView {ContentView} The ContentView to display as the active content
+     */
     GalleryView.prototype.jump = function (contentView) {
         var contentViewIndex = this.contentViews.indexOf(contentView);
-        if (contentViewIndex == 0) {
-            newContentCount = 0;
+        if (contentViewIndex === 0) {
+            this.newContentCount = 0;
             this.$el.trigger('jumpToHead.hub');
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount--;
@@ -247,18 +254,29 @@ define([
         }, 250);
     };
 
+    /**
+     * Focus the gallery view to the ContentView following the currently active ContentView
+     */
     GalleryView.prototype.next = function () {
         var activeIndex = this.contentViews.indexOf(this._activeContentView);
         var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
         this.jump(targetContentView);
     };
 
+    /**
+     * Focus the gallery view  to the ContentView preceding the currently active ContentView
+     */
     GalleryView.prototype.prev = function () {
         var activeIndex = this.contentViews.indexOf(this._activeContentView);
         var targetContentView = this.contentViews[activeIndex-1 || 0];
         this.jump(targetContentView);
     };
 
+    /**
+     * Displays the specified ContentView to be active, or defaults to the first ContentView in the gallery
+     * @param opts {Object} A set of options to change the focus of the gallery view with
+     * @param opts.contentView {ContentView} The ContentView to be active
+     */
     GalleryView.prototype.focus = function (opts) {
         if (! this._activeContentView) {
             this._activeContentView = this.contentViews[0];
@@ -288,14 +306,19 @@ define([
         targetContainerEl.nextAll().addClass('content-after');
         var before1 = targetContainerEl.prev().addClass('content-before-1');
         var before2 = before1.prev().addClass('content-before-2');
-        var before3 = before2.prev().addClass('content-before-3');
+        before2.prev().addClass('content-before-3');
         var after1 = targetContainerEl.next().addClass('content-after-1');
         var after2 = after1.next().addClass('content-after-2');
-        var after3 = after2.next().addClass('content-after-3');
+        after2.next().addClass('content-after-3');
 
         return this._adjustContentSize(opts);
     };
 
+    /**
+     * @private
+     * Calculates an appropriate size of a ContentView that respects 
+     * the specified aspect ratio
+     */
     GalleryView.prototype._getContentSize = function () {
         var containerWidth = this.$el.width();
         var contentHeight = this.$el.height();
@@ -315,6 +338,13 @@ define([
         return { width: contentWidth, height: contentHeight };
     };
 
+    /**
+     * @private
+     * Sets appropriate dimensions on each ContentView in the gallery.
+     * By default, a ContentViews new dimensions respects the gallery's specified aspect ratio.
+     * For content whose intrinsic apsect ratio is 1:1, it will retain a 1:1 aspect ratio.
+     * ContentViews with tiled attachments will also retain a 1:1 aspect ratio.
+     */
     GalleryView.prototype._adjustContentSize = function (opts) {
         var styleEl = $('style.'+this._id);
         if (styleEl) {
@@ -335,7 +365,7 @@ define([
             var contentEl = contentWithImageEls.eq(i).closest('.content-container');
             if (contentEl.find('.content-attachment-video').length) {
                 contentEl.find('.content, .content-attachment').css({
-                    'padding-bottom': 1/this._aspectRatio * 100 + '%',
+                    'padding-bottom': 1/this._aspectRatio * 100 + '%'
                 });
             } else {
                 contentEl.css({
@@ -350,11 +380,19 @@ define([
         return this._relayout(opts);
     };
 
+    /**
+     * @private
+     * Triggers a resizing/respacing of ContentViews
+     */
     GalleryView.prototype._relayout = function (opts) {
         this._animating = true;
         return this._slideshowSpacing(opts);
     };
 
+    /**
+     * @private
+     * Applies correct spacing for all ContentViews
+     */
     GalleryView.prototype._slideshowSpacing = function (opts) {
         opts = opts || {};
         var visibleAdjacentContent = 3;
@@ -378,11 +416,13 @@ define([
             // Before
             var contentBefore = adjacentContentEls.filter('.content-before-'+adjacentIndex);
             var contentBeforeWidth;
+            var previousEl;
+            var previousWidth;
             if (contentBefore.length) {
                 GALLERY_CSS['contentBefore'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
                 contentBeforeWidth = contentBefore[0].getBoundingClientRect().width;
-                var previousEl = contentBefore.next();
-                var previousWidth = previousEl[0].getBoundingClientRect().width;
+                previousEl = contentBefore.next();
+                previousWidth = previousEl[0].getBoundingClientRect().width;
                 beforeTranslateX = beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
                 GALLERY_CSS['contentBefore'+adjacentIndex].transforms.translateX = beforeTranslateX+'px';
             }
@@ -393,9 +433,9 @@ define([
             if (contentAfter.length) {
                 GALLERY_CSS['contentAfter'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
                 contentAfterWidth = contentAfter[0].getBoundingClientRect().width;
-                var previousEl = contentAfter.prev();
-                var previousWidth = previousEl[0].getBoundingClientRect().width;
-                afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2
+                previousEl = contentAfter.prev();
+                previousWidth = previousEl[0].getBoundingClientRect().width;
+                afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2;
                 GALLERY_CSS['contentAfter'+adjacentIndex].transforms.translateX = afterTranslateX+'px';
             }
         }
@@ -405,18 +445,25 @@ define([
         return GALLERY_CSS;
     };
 
+    /**
+     * @private
+     * Replaces a style element that determines the spacing, and animations when 
+     * the gallery changes focus
+     */
     GalleryView.prototype._updateStyleEl = function (translate) {
         translate = translate === undefined ? true : translate;
         for (var style in GALLERY_CSS) {
-            var transform = '';
-            for (var t in GALLERY_CSS[style].transforms) {
-                if (translate || style == 'contentBefore' || style == 'contentAfter' || (!translate && t.indexOf('translate') == -1)) {
-                    transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
+            if (GALLERY_CSS.hasOwnProperty(style)) {
+                var transform = '';
+                for (var t in GALLERY_CSS[style].transforms) {
+                    if (translate || style === 'contentBefore' || style === 'contentAfter' || (!translate && t.indexOf('translate') === -1)) {
+                        transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
+                    }
                 }
+                GALLERY_CSS[style].transform = transform;
             }
-            GALLERY_CSS[style].transform = transform;
         }
-        var styleInnerHtml = ThemeCssTemplate(GALLERY_CSS);
+        var styleInnerHtml = themeCssTemplate(GALLERY_CSS);
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
         for (var i=0; i < matches.length; i++) {
             var idx = styleInnerHtml.indexOf(matches[i]);
@@ -439,6 +486,7 @@ define([
         this.more.on('readable', function () {
             var content;
             while (content = self.more.read()) {
+                log('Adding content: ' + content);
                 self.add(content);
             }
         });
