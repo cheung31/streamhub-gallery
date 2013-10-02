@@ -38,6 +38,8 @@ define([
      *
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
+     * @param opts.aspectRatio {Number} The element in which to render the streamed content
+     * @param opts.thumbnailScale {Number} The scale value of non-focused ContentViews
      * @exports streamhub-gallery
      * @augments streamhub-gallery/views/horizontal-list-view
      * @constructor
