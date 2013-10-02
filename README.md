@@ -6,7 +6,7 @@ streamhub-gallery is a [StreamHub App](http://apps.livefyre.com) that displays s
 
 ## Getting Started
 
-The quickest way to use streamhub-timeline is to use the built version hosted on Livefyre's CDN.
+The quickest way to use streamhub-gallery is to use the built version hosted on Livefyre's CDN.
 
 ### Dependencies
 
@@ -24,7 +24,7 @@ Optionally, include some reasonable default CSS rules for StreamHub Content. Thi
 
 ### Usage
 
-1. Require streamhub-sdk and streamhub-timeline
+1. Require streamhub-sdk and streamhub-gallery
 
         var GalleryView = Livefyre.require('streamhub-gallery');
     
@@ -59,7 +59,7 @@ Clone this repo
 
 Development dependencies are managed by [npm](https://github.com/isaacs/npm), which you should install first.
 
-With npm installed, install streamhub-timeline's dependencies. This will also download [Bower](https://github.com/bower/bower) and use it to install browser dependencies.
+With npm installed, install streamhub-gallery's dependencies. This will also download [Bower](https://github.com/bower/bower) and use it to install browser dependencies.
 
     cd streamhub-gallery
     npm install
