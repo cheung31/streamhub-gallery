@@ -18,6 +18,12 @@ define([
                 var view = new GalleryView({ modal: true });
                 expect(view).toBeDefined();
             });
+
+            it("renders itself", function () {
+                spyOn(GalleryView.prototype, 'render');
+                var view = new GalleryView({ modal: true });
+                expect(GalleryView.prototype.render).toHaveBeenCalled();
+            });
         });
 
         // setElement
@@ -34,7 +40,7 @@ define([
             });
 
             it('.el is the element that we are setting', function () {
-                expect($(view.el).parent()).toBe(myEl);
+                expect(view.el).toBe(myEl);
             });
 
             it('has an event listener on the #focusContent.hub event', function () {
@@ -44,12 +50,23 @@ define([
             it('has an event listener on the #click event', function () {
                 expect($(view.el)).toHandle('click');
             });
+        });
 
-            it('has added the class name "streamhub-gallery-view"', function () {
-                expect(view.el).toHaveClass('streamhub-gallery-view');
+        // render
+        describe('renders the view', function () {
+            var view;
+            view = new GalleryView();
+
+            it('appends a child element with class "streamhub-gallery-view"', function () {
+                expect($(view.el).find('.streamhub-gallery-view')).toHaveClass('streamhub-gallery-view');
+            });
+
+            it('appends a child element with class "streamhub-gallery-view-notification"', function () {
+                expect($(view.el).find('.streamhub-gallery-view-notification')).toHaveClass('streamhub-gallery-view-notification');
             });
         });
 
+        // add
         describe('can have content items added to it', function () {
 
             var view,
