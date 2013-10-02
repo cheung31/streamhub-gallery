@@ -2,7 +2,7 @@
 
 streamhub-gallery is a [StreamHub App](http://apps.livefyre.com) that displays social content in a horizontal CoverFlow-like gallery.
 
-![Gallery View](http://i.imgur.com/HaBxIwp.png)
+![Gallery View](http://i.imgur.com/9VoyWji.png)
 
 ## Getting Started
 
