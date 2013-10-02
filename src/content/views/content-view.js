@@ -1,8 +1,8 @@
 define([
     'streamhub-sdk/content/views/content-view',
     'hgn!streamhub-gallery/content/templates/content',
-    'streamhub-sdk/util'
-], function (BaseContentView, ContentTemplate, util) {
+    'inherits'
+], function (BaseContentView, ContentTemplate, inherits) {
     
     /**
      * Defines the base class for all content-views. Handles updates to attachments
@@ -19,7 +19,7 @@ define([
         opts = opts || {};
         BaseContentView.call(this, opts);
     };
-    util.inherits(ContentView, BaseContentView);
+    inherits(ContentView, BaseContentView);
     
     ContentView.prototype.template = ContentTemplate;
 

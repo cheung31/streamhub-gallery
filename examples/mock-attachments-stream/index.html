@@ -7,7 +7,7 @@
     <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <style>
-        body { font-family: Helvetica, Arial, sans-serif; position: absolute; width: 100%; height: 100%; margin: 0; padding: 0; background-color: #EFEFEF; }
+        body { font-family: Helvetica, Arial, sans-serif; position: absolute; width: 100%; height: 100%; margin: 0; padding: 0; background-color: #333; }
         #view { width: 100%; height: 100%; }
     </style>
 </head>
@@ -24,12 +24,12 @@
         </script>
         <script>
         require([
-            'streamhub-sdk',
             'streamhub-gallery',
+            'streamhub-sdk/content',
             'streamhub-sdk-tests/mocks/mock-attachments-stream',
-            'streamhub-sdk/stream-manager'
-        ],function (Hub, GalleryView, MockAttachmentsStream, StreamManager) {
-            window.Hub = Hub;
+            'streamhub-sdk-tests/mocks/mock-stream'
+        ],function (GalleryView, Content, MockAttachmentsStream, MockStream) {
+            window.Content = Content;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3
@@ -37,26 +37,9 @@
                 //,modal: false
             });
 
-            var streams = new StreamManager({
-                main: new MockAttachmentsStream()
-            });
-            
-            /* Uncomment to filter out content without attachments
-            livefyreStreams.on('readable', function (stream) {
-                var content = stream.read();
-                // Add now if there are attachments
-                if (content.attachments.length) {
-                    return view.add(content);
-                }
-                // If no attachments yet, if one is added, then show in wall
-                content.on('attachment', function () {
-                    console.log('attach', content.attachments);
-                    view.add(content);
-                });
-            });
-            */
-
-            streams.bind(view).start();
+            (new MockAttachmentsStream()).pipe(view, { end: false });
+            window.mockStream = new MockStream.LivefyreContent();
+            (window.mockStream).pipe(view.more);
         });
         </script>
     </body>
