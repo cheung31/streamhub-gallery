@@ -1,19 +1,32 @@
 define([
-    'streamhub-sdk/views/list-view',
-    'streamhub-gallery/content-view-factory',
+    'streamhub-sdk/content/views/content-list-view',
+    'streamhub-gallery/content/content-view-factory',
     'text!streamhub-gallery/css/horizontal-list-view.css',
-    'streamhub-sdk/util'
-], function (ListView, HorizontalContentViewFactory, HorizontalListViewCss, util) {
+    'streamhub-sdk/debug',
+    'inherits'
+], function (ContentListView, HorizontalContentViewFactory, HorizontalListViewCss, debug, inherits) {
+    'use strict';
+
+    var log = debug('streamhub-gallery/views/horizontal-list-view');
 
     var STYLE_EL;
 
+    /**
+     * A simple View that displays Content in a horizontal list.
+     *
+     * @param opts {Object} A set of options to config the view with
+     * @param opts.el {HTMLElement} The element in which to render the streamed content
+     * @exports streamhub-gallery/views/horizontal-list-view
+     * @augments streamhub-sdk/views/list-view
+     * @constructor
+     */
     var HorizontalListView = function (opts) {
         opts = opts || {};
         this._id = 'streamhub-horizontal-list-'+new Date().getTime();
         this._aspectRatio = opts.aspectRatio || 16/9;
 
         opts.contentViewFactory = new HorizontalContentViewFactory();
-        ListView.call(this, opts);
+        ContentListView.call(this, opts);
 
         if (!STYLE_EL) {
             STYLE_EL = $('<style></style>').text(HorizontalListViewCss).prependTo('head');
@@ -25,16 +38,29 @@ define([
         });
         this._adjustContentSize();
     };
-    util.inherits(HorizontalListView, ListView);
+    inherits(HorizontalListView, ContentListView);
 
     HorizontalListView.prototype.horizontalListViewClassName = 'streamhub-horizontal-list-view';
     HorizontalListView.prototype.contentContainerClassName = 'content-container';
 
+    /**
+     * Set the element for the view to render in.
+     * You will probably want to call .render() after this, but not always.
+     * @param element {HTMLElement} The element to render this View in
+     * @return this
+     */
     HorizontalListView.prototype.setElement = function (el) {
-        ListView.prototype.setElement.call(this, el);
+        ContentListView.prototype.setElement.call(this, el);
         this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
     };
 
+    /**
+     * @private
+     * Sets appropriate dimensions on each ContentView in the gallery.
+     * By default, a ContentViews new dimensions respects the gallery's specified aspect ratio.
+     * For content whose intrinsic apsect ratio is 1:1, it will retain a 1:1 aspect ratio.
+     * ContentViews with tiled attachments will also retain a 1:1 aspect ratio.
+     */
     HorizontalListView.prototype._adjustContentSize = function () {
         if (! this._aspectRatio) {
             return;
@@ -55,10 +81,13 @@ define([
         return styleEl;
     };
 
-    HorizontalListView.prototype.add = function (content) {
-        ListView.prototype.add.call(this, content);
-    };
-
+    /**
+     * @private
+     * Insert a contentView into the ListView's .el
+     * after being wrapped by a container element.
+     * Get insertion index based on this.comparator
+     * @param contentView {ContentView} The ContentView's element to insert to the DOM
+     */
     HorizontalListView.prototype._insert = function (contentView) {
         var newContentViewIndex,
             $previousEl;
