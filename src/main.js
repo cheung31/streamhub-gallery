@@ -232,7 +232,7 @@ define([
             this.newContentCount = 0;
             this.$el.trigger('jumpToHead.hub');
         } else if (contentViewIndex < this._newContentCount) {
-            this._newContentCount--;
+            this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
         } else if (contentViewIndex >= this.views.length - 3) {
             this.showMore(3);
