@@ -89,7 +89,7 @@ define([
         this._newQueue.write(content);
 
         // If there is new content and we're not focused at the head, show notification
-        if (this.contentViews.indexOf(this._activeContentView) !== 0) {
+        if (this.views.indexOf(this._activeContentView) !== 0) {
             this._newContentCount++;
             this._showNewNotification();
         }
@@ -116,10 +116,10 @@ define([
             e.stopPropagation();
 
             var targetContentView;
-            for (var i=0; i < self.contentViews.length; i++) {
+            for (var i=0; i < self.views.length; i++) {
                 var contentEl = $(e.target).hasClass('content') ? e.target : $(e.target).closest('article.content')[0];
-                if (self.contentViews[i].el === contentEl) {
-                    targetContentView = self.contentViews[i];
+                if (self.views[i].el === contentEl) {
+                    targetContentView = self.views[i];
                     break;
                 }
             }
@@ -139,7 +139,7 @@ define([
         $(el).on('click', '.streamhub-gallery-view-notification', function (e) {
             e.preventDefault();
             // Jump to head when the notification is clicked
-            self.jump(self.contentViews[0]);
+            self.jump(self.views[0]);
         });
 
         HorizontalListView.prototype.setElement.call(this, el);
@@ -148,7 +148,7 @@ define([
     /**
      * Add a piece of Content to the ListView
      *     .createContentView(content)
-     *     add newContentView to this.contentViews[]
+     *     add newContentView to this.views[]
      *     render the newContentView
      *     insert the newContentView into this.el according to this.comparator
      * @param content {Content} A Content model to add to the ListView
@@ -172,6 +172,9 @@ define([
      * Display the new content notification
      */
     GalleryView.prototype._showNewNotification = function () {
+        if (! this._newContentCount) {
+            return;
+        }
         var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
         notificationEl.find('.streamhub-gallery-view-notification-count').html(
             this._newContentCount < 100 ? this._newContentCount : '99+'
@@ -201,7 +204,7 @@ define([
         var newContentViewIndex,
             $previousEl;
 
-        newContentViewIndex = this.contentViews.indexOf(contentView);
+        newContentViewIndex = this.views.indexOf(contentView);
 
         var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
         contentView.$el.wrap($containerEl);
@@ -212,7 +215,7 @@ define([
             $wrappedEl.prependTo(this.$galleryEl);
         } else {
             // Find it's previous contentView and insert new contentView after
-            $previousEl = this.contentViews[newContentViewIndex - 1].$el;
+            $previousEl = this.views[newContentViewIndex - 1].$el;
             $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
         }
 
@@ -224,14 +227,14 @@ define([
      * @param contentView {ContentView} The ContentView to display as the active content
      */
     GalleryView.prototype.jump = function (contentView) {
-        var contentViewIndex = this.contentViews.indexOf(contentView);
+        var contentViewIndex = this.views.indexOf(contentView);
         if (contentViewIndex === 0) {
             this.newContentCount = 0;
             this.$el.trigger('jumpToHead.hub');
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount--;
             this._showNewNotification();
-        } else if (contentViewIndex >= this.contentViews.length - 3) {
+        } else if (contentViewIndex >= this.views.length - 3) {
             this.showMore(3);
         }
         this.$el.removeClass('animate');
@@ -261,8 +264,8 @@ define([
      * Focus the gallery view to the ContentView following the currently active ContentView
      */
     GalleryView.prototype.next = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        var targetContentView = this.contentViews[Math.min(activeIndex+1, this.contentViews.length-1)];
+        var activeIndex = this.views.indexOf(this._activeContentView);
+        var targetContentView = this.views[Math.min(activeIndex+1, this.views.length-1)];
         this.jump(targetContentView);
     };
 
@@ -270,8 +273,8 @@ define([
      * Focus the gallery view  to the ContentView preceding the currently active ContentView
      */
     GalleryView.prototype.prev = function () {
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
-        var targetContentView = this.contentViews[activeIndex-1 || 0];
+        var activeIndex = this.views.indexOf(this._activeContentView);
+        var targetContentView = this.views[activeIndex-1 || 0];
         this.jump(targetContentView);
     };
 
@@ -282,7 +285,7 @@ define([
      */
     GalleryView.prototype.focus = function (opts) {
         if (! this._activeContentView) {
-            this._activeContentView = this.contentViews[0];
+            this._activeContentView = this.views[0];
         }
 
         opts = opts || {};
@@ -300,9 +303,9 @@ define([
             .removeAttr('style');
 
         this._activeContentView = opts.contentView ? opts.contentView : this._activeContentView;
-        var activeIndex = this.contentViews.indexOf(this._activeContentView);
+        var activeIndex = this.views.indexOf(this._activeContentView);
 
-        var targetContentEl = this.contentViews[activeIndex].$el;
+        var targetContentEl = this.views[activeIndex].$el;
         var targetContainerEl = targetContentEl.parent();
         targetContainerEl.addClass('content-active');
         targetContainerEl.prevAll().addClass('content-before');
@@ -476,23 +479,6 @@ define([
 
         GALLERY_THEME_STYLE_EL.remove();
         GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
-    };
-
-   /**
-    * @private
-    * Register listeners to the .more stream so that the items
-    * it reads out go somewhere useful.
-    * By default, this .add()s the items
-    */
-    GalleryView.prototype._pipeMore = function () {
-        var self = this;
-        this.more.on('readable', function () {
-            var content;
-            while (content = self.more.read()) {
-                log('Adding content: ' + content);
-                self.add(content);
-            }
-        });
     };
 
     return GalleryView;

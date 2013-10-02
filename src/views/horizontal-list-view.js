@@ -1,10 +1,10 @@
 define([
-    'streamhub-sdk/views/list-view',
+    'streamhub-sdk/content/views/content-list-view',
     'streamhub-gallery/content/content-view-factory',
     'text!streamhub-gallery/css/horizontal-list-view.css',
     'streamhub-sdk/debug',
     'inherits'
-], function (ListView, HorizontalContentViewFactory, HorizontalListViewCss, debug, inherits) {
+], function (ContentListView, HorizontalContentViewFactory, HorizontalListViewCss, debug, inherits) {
     'use strict';
 
     var log = debug('streamhub-gallery/views/horizontal-list-view');
@@ -26,7 +26,7 @@ define([
         this._aspectRatio = opts.aspectRatio || 16/9;
 
         opts.contentViewFactory = new HorizontalContentViewFactory();
-        ListView.call(this, opts);
+        ContentListView.call(this, opts);
 
         if (!STYLE_EL) {
             STYLE_EL = $('<style></style>').text(HorizontalListViewCss).prependTo('head');
@@ -38,7 +38,7 @@ define([
         });
         this._adjustContentSize();
     };
-    inherits(HorizontalListView, ListView);
+    inherits(HorizontalListView, ContentListView);
 
     HorizontalListView.prototype.horizontalListViewClassName = 'streamhub-horizontal-list-view';
     HorizontalListView.prototype.contentContainerClassName = 'content-container';
@@ -50,7 +50,7 @@ define([
      * @return this
      */
     HorizontalListView.prototype.setElement = function (el) {
-        ListView.prototype.setElement.call(this, el);
+        ContentListView.prototype.setElement.call(this, el);
         this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
     };
 
@@ -79,19 +79,6 @@ define([
         styleEl.html(styles);
         $('head').append(styleEl);
         return styleEl;
-    };
-
-    /**
-     * Add a piece of Content to the ListView
-     *     .createContentView(content)
-     *     add newContentView to this.contentViews[]
-     *     render the newContentView
-     *     insert the newContentView into this.el according to this.comparator
-     * @param content {Content} A Content model to add to the ListView
-     * @returns the newly created ContentView
-     */
-    HorizontalListView.prototype.add = function (content) {
-        ListView.prototype.add.call(this, content);
     };
 
     /**
