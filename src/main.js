@@ -17,14 +17,12 @@ define([
     var GALLERY_CSS = {
         contentBefore: {
             transforms: {
-                translateX: '-9999px',
-                scale: 0.5
+                translateX: '-9999px'
             }
         },
         contentAfter: {
             transforms: {
-                translateX: '9999px',
-                scale: 0.5
+                translateX: '9999px'
             }
         }
     };
@@ -55,6 +53,9 @@ define([
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
         this._animating = false;
+        this._thumbnailScale = opts.thumbnailScale || 0.6;
+        GALLERY_CSS.contentAfter.transforms.scale = this._thumbnailScale;
+        GALLERY_CSS.contentBefore.transforms.scale = this._thumbnailScale;
 
         var self = this;
         this._newQueue.on('readable', function () {
