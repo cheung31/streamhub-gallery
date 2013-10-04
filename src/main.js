@@ -167,6 +167,14 @@ define([
         return contentView;
     };
 
+    GalleryView.prototype.remove = function (content) {
+        var contentView = this.getContentView(content);
+        if (this._activeContentView === contentView) {
+            this._activeContentView = null;
+        }
+        return HorizontalListView.prototype.remove.call(this, content);
+    };
+
     /**
      * @private
      * Display the new content notification
