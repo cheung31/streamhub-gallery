@@ -1,6 +1,6 @@
 define([
     'streamhub-sdk/jquery',
-    'streamhub-gallery/themes/animator',
+    'streamhub-gallery/animators/animator',
     'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
@@ -56,6 +56,13 @@ define([
 
     GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
+
+    GalleryView.prototype.switchAnimator = function (animator) {
+        this._animator.destroy();
+        animator.setView(this);
+        this._animator = animator;
+        this.jumpTo();
+    };
 
     /**
      * @private
@@ -160,7 +167,7 @@ define([
      * Display the new content notification
      */
     GalleryView.prototype._showNewNotification = function () {
-        if (! this._newContentCount) {
+        if (this._newContentCount < 1) {
             return;
         }
         var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
@@ -230,7 +237,7 @@ define([
             this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
         } else if (contentViewIndex >= this.views.length - 3) {
-            this.showMore();
+            this.showMore(5);
         }
 
         var originalActiveContentView = this._activeContentView;
