@@ -35,6 +35,9 @@ define([
         var self = this;
         $(window).on('resize', function (e) {
             self._adjustContentSize();
+            if (self._animator && self._jumping === false) {
+                self._animator.animate();
+            }
         });
         this._adjustContentSize();
     };

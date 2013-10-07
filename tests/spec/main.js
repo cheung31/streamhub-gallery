@@ -78,12 +78,41 @@ define([
             });
 
             it('sets the _activeContentView when the first content item is added to the Gallery View', function () {
-                view.add(content);
+                view.write(content);
                 expect(view._activeContentView).toBeDefined();
+            });
+
+            it('calls the #_insert method to attach the content view into the DOM', function () {
+                spyOn(view, '_insert');
+                view.write(content);
+                expect(view._insert).toHaveBeenCalled();
+            });
+
+            describe('#_insert', function () {
+
+                var view,
+                    myEl,
+                    content = new Content({ body: "this is some dude's comment" });
+
+                beforeEach(function () {
+                    view = new GalleryView();
+                });
+
+                it('calls #_focus', function () {
+                    spyOn(view, '_focus');
+                    view.write(content);
+                    expect(view._focus).toHaveBeenCalled();
+                });
+
+                it('calls ._animator#animate', function () {
+                    spyOn(view._animator, 'animate');
+                    view.write(content);
+                    expect(view._animator.animate).toHaveBeenCalled();
+                });
             });
         });
 
-        // focus a content item
+        // focus a content item (e.g. to shift the active content item)
         describe('can focus a content item', function () {
 
             var view,
@@ -92,49 +121,80 @@ define([
 
             beforeEach(function () {
                 view = new GalleryView();
-                view.add(content);
+                view.write(content);
             });
 
             it('adds the "content-active" class name to the focused content view\'s parent element', function () {
-                view.focus();
+                view._focus();
                 expect($(view._activeContentView.el).parent()).toHaveClass('content-active');
             });
 
             it('adds "content-before" classes to previous siblings.', function () {
                 var content1 = new Content();
-                view.add(content1);
+                view.write(content1);
                 var content2 = new Content();
-                view.add(content2);
+                view.write(content2);
                 var content3 = new Content();
-                view.add(content3);
+                view.write(content3);
 
-                view.focus({ contentView: view.contentViews[view.contentViews.length-1] });
-                expect($(view.contentViews[0].el).parent()).toHaveClass('content-before');
-                expect($(view.contentViews[1].el).parent()).toHaveClass('content-before');
-                expect($(view.contentViews[2].el).parent()).toHaveClass('content-before');
+                view._focus({ contentView: view.views[view.views.length-1] });
+                expect($(view.views[0].el).parent()).toHaveClass('content-before');
+                expect($(view.views[1].el).parent()).toHaveClass('content-before');
+                expect($(view.views[2].el).parent()).toHaveClass('content-before');
             });
 
             it('adds "content-after" classes to next siblings.', function () {
                 var content1 = new Content();
-                view.add(content1);
+                view.write(content1);
                 var content2 = new Content();
-                view.add(content2);
+                view.write(content2);
                 var content3 = new Content();
-                view.add(content3);
+                view.write(content3);
 
-                view.focus({ contentView: view.contentViews[0] });
-                expect($(view.contentViews[1].el).parent()).toHaveClass('content-after');
-                expect($(view.contentViews[2].el).parent()).toHaveClass('content-after');
-                expect($(view.contentViews[3].el).parent()).toHaveClass('content-after');
-            });
-
-            it('calls the ._adjustContentSize method', function () {
-                spyOn(view, '_adjustContentSize');
-                view.focus();
-                expect(view._adjustContentSize).toHaveBeenCalled();
+                view._focus({ contentView: view.views[0] });
+                expect($(view.views[1].el).parent()).toHaveClass('content-after');
+                expect($(view.views[2].el).parent()).toHaveClass('content-after');
+                expect($(view.views[3].el).parent()).toHaveClass('content-after');
             });
         });
 
+        // jumpTo
+        describe('can jump to a particular content item with an animation', function () {
+
+            var view,
+                myEl,
+                content1 = new Content({ body: "this is some dude's comment" }),
+                content2 = new Content({ body: "this is some other dude's comment" });
+
+            beforeEach(function () {
+                view = new GalleryView();
+                view.write(content1);
+                view.write(content2);
+            });
+        });
+
+        // Notifications of newly streamed content
+        /*
+        describe('can notify user of newly streamed content', function () {
+            var view,
+                myEl,
+                content1 = new Content({ body: "this is some dude's comment" }),
+                content2 = new Content({ body: "this is some other dude's comment" });
+
+            beforeEach(function () {
+                view = new GalleryView();
+            });
+
+            it('calls #_showNewNotification', function () {
+                spyOn(view, '_showNewNotification');
+                view.write(content1);
+                expect(view._showNewNotification).toHaveBeenCalled();
+                expect(view._newContentCount).toBe(1);
+            });
+        });
+        */
+
+        // react to a resize of the container
     });
  
 });
