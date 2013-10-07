@@ -129,7 +129,7 @@ define([
                 expect($(view._activeContentView.el).parent()).toHaveClass('content-active');
             });
 
-            it('adds "content-before" classes to previous siblings.', function () {
+            it('adds "content-before" classes to previous siblings', function () {
                 var content1 = new Content();
                 view.write(content1);
                 var content2 = new Content();
@@ -137,13 +137,13 @@ define([
                 var content3 = new Content();
                 view.write(content3);
 
-                view._focus({ contentView: view.views[view.views.length-1] });
+                view._focus(view.views[view.views.length-1]);
                 expect($(view.views[0].el).parent()).toHaveClass('content-before');
                 expect($(view.views[1].el).parent()).toHaveClass('content-before');
                 expect($(view.views[2].el).parent()).toHaveClass('content-before');
             });
 
-            it('adds "content-after" classes to next siblings.', function () {
+            it('adds "content-after" classes to next siblings', function () {
                 var content1 = new Content();
                 view.write(content1);
                 var content2 = new Content();
@@ -151,7 +151,7 @@ define([
                 var content3 = new Content();
                 view.write(content3);
 
-                view._focus({ contentView: view.views[0] });
+                view._focus(view.views[0]);
                 expect($(view.views[1].el).parent()).toHaveClass('content-after');
                 expect($(view.views[2].el).parent()).toHaveClass('content-after');
                 expect($(view.views[3].el).parent()).toHaveClass('content-after');
@@ -174,7 +174,6 @@ define([
         });
 
         // Notifications of newly streamed content
-        /*
         describe('can notify user of newly streamed content', function () {
             var view,
                 myEl,
@@ -183,18 +182,17 @@ define([
 
             beforeEach(function () {
                 view = new GalleryView();
+                view.write(content1);
             });
 
             it('calls #_showNewNotification', function () {
                 spyOn(view, '_showNewNotification');
-                view.write(content1);
+                view.write(content2);
                 expect(view._showNewNotification).toHaveBeenCalled();
                 expect(view._newContentCount).toBe(1);
             });
         });
-        */
 
-        // react to a resize of the container
     });
  
 });
