@@ -13,8 +13,7 @@
     "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1",
     "requirejs-plugins": "~1.0.2",
     "event-emitter": "git://github.com/Livefyre/event-emitter.git",
-    "inherits": "git://github.com/Livefyre/inherits.git",
-    "anima": "*"
+    "inherits": "git://github.com/Livefyre/inherits.git"
   },
   "devDependencies": {
     "jasmine": "*",

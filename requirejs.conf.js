@@ -1,7 +1,6 @@
 requirejs.config({
   baseUrl: '/',
   paths: {
-    anima: 'lib/anima/anima',
     jquery: 'lib/jquery/jquery',
 	jasmine: 'lib/jasmine/lib/jasmine-core/jasmine',
     'jasmine-html': 'lib/jasmine/lib/jasmine-core/jasmine-html',
