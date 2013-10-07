@@ -171,6 +171,41 @@ define([
                 view.write(content1);
                 view.write(content2);
             });
+
+            it('calculates new transforms by seeking the final state', function () {
+                spyOn(view, '_focus');
+                spyOn(view._animator, 'animate');
+
+                view.jumpTo(view.getContentView(content2));
+
+                expect(view._focus).toHaveBeenCalledWith(view.getContentView(content2));
+                expect(view._animator.animate).toHaveBeenCalledWith({ translate: false, seek: true });
+            });
+
+            it('seeks the original state', function () {
+                spyOn(view, '_focus');
+                spyOn(view._animator, 'animate');
+
+                view.jumpTo(view.getContentView(content2));
+
+                expect(view._focus).toHaveBeenCalledWith(view.getContentView(content1));
+                expect(view._animator.animate).toHaveBeenCalledWith({ seek: true });
+            });
+
+            it('animates to the final state', function () {
+                view._focus(view.getContentView(content2));
+                var newTransforms = view._animator.animate({ translate: false, seek: true });
+                view.jumpTo(view.getContentView(content1));
+
+                spyOn(view, '_focus');
+                spyOn(view._animator, 'animate').andCallThrough();
+
+                view.jumpTo(view.getContentView(content2));
+
+                expect(view.$el).toHaveClass('animate');
+                expect(view._focus).toHaveBeenCalledWith(view.getContentView(content2));
+                expect(view._animator.animate).toHaveBeenCalledWith({ transforms: newTransforms });
+            });
         });
 
         // Notifications of newly streamed content

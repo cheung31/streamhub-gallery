@@ -24,6 +24,7 @@ define([
     Animator.prototype._transforms.contentAfter3 = { opacity: 0.1 };
 
     Animator.prototype.animate = function (opts) {
+        opts = opts || {};
         this._galleryView.animating = true;
         var newTransforms = this._updateTransforms(opts);
         return newTransforms;
