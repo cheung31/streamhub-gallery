@@ -193,6 +193,43 @@ define([
             });
         });
 
+        // Resize
+        describe('can adjust to window resize', function () {
+
+            var view;
+
+            beforeEach(function () {
+                view = new GalleryView();
+            });
+
+            it('calls #_handleResize', function () {
+                spyOn(view, '_handleResize');
+                $(window).trigger('resize');
+                expect(view._handleResize).toHaveBeenCalled();
+            });
+
+            describe('#_handleResize', function () {
+
+                var view,
+                    content = new Content({ body: "this is some dude's comment" });
+
+                beforeEach(function () {
+                    view = new GalleryView();
+                });
+
+                it('calls #_adjustContentSize', function () {
+                    spyOn(view, '_adjustContentSize');
+                    $(window).trigger('resize');
+                    expect(view._adjustContentSize).toHaveBeenCalled();
+                });
+
+                it('calls ._animator#animate', function ()  {
+                    spyOn(view._animator, 'animate');
+                    $(window).trigger('resize');
+                    expect(view._animator.animate).toHaveBeenCalled();
+                });
+            });
+        });
     });
  
 });
