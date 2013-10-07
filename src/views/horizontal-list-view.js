@@ -34,10 +34,7 @@ define([
 
         var self = this;
         $(window).on('resize', function (e) {
-            self._adjustContentSize();
-            if (self._animator && self._jumping === false) {
-                self._animator.animate();
-            }
+            self._handleResize(e);
         });
         this._adjustContentSize();
     };
@@ -55,6 +52,10 @@ define([
     HorizontalListView.prototype.setElement = function (el) {
         ContentListView.prototype.setElement.call(this, el);
         this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
+    };
+
+    HorizontalListView.prototype._handleResize = function (e) {
+        this._adjustContentSize();
     };
 
     /**

@@ -343,6 +343,11 @@ define([
         return { width: contentWidth, height: contentHeight };
     };
 
+    GalleryView.prototype._handleResize = function (e) {
+        this._adjustContentSize();
+        this._animator.animate();
+    };
+
     /**
      * @private
      * Sets appropriate dimensions on each ContentView in the gallery.
