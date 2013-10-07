@@ -27,6 +27,7 @@ define([
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
+        opts.more = opts.more || this._createMoreStream({ initial: 7 })
 
         this._animator = new Animator(this);
 
