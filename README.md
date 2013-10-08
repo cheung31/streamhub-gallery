@@ -2,6 +2,7 @@
 
 streamhub-gallery is a [StreamHub App](http://apps.livefyre.com) that displays social content in a horizontal CoverFlow-like gallery.
 
+Classic Gallery
 ![Gallery View](http://i.imgur.com/9VoyWji.png)
 
 ## Getting Started
@@ -48,6 +49,20 @@ Optionally, include some reasonable default CSS rules for StreamHub Content. Thi
         collection.pipe(view);
 
 You now have a Timeline! See this all in action on [this jsfiddle](http://jsfiddle.net/G9PPf/5/).
+
+### Changing Themes
+
+The ```GalleryView``` constructor accepts the ```animator``` option. By passing in an instance of a ```Animator```, the Gallery view can be customized to visualize a stream to your liking. There are two animators included, ```streamhub-gallery/animators/coverflow-animator``` and ```streamhub-gallery/animators/carousel-animator```.
+
+        var CoverflowAnimator = Livefyre.require('streamhub-gallery/animators/coverflow-animator');
+        var view = new GalleryView({
+        	el: document.getElementById("myGallery"),
+        	animator: new CoverflowAnimator()
+    	});
+
+
+Coverflow
+![Coverflow Gallery View](http://i.imgur.com/AC8dxxW.png)
 
 ## Local Development
 
