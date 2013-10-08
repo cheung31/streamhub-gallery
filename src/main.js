@@ -19,7 +19,7 @@ define([
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
      * @param opts.aspectRatio {Number} The element in which to render the streamed content
-     * @param opts.thumbnailScale {Number} The scale value of non-focused ContentViews
+     * @param opts.animator {Animator} An instance of Animator that manages animating adjacent content
      * @exports streamhub-gallery
      * @augments streamhub-gallery/views/horizontal-list-view
      * @constructor
@@ -29,7 +29,7 @@ define([
         opts.aspectRatio = opts.aspectRatio || 16/9;
         opts.more = opts.more || this._createMoreStream({ initial: 7 })
 
-        this._animator = new Animator(this);
+        this._animator = opts.animator || new Animator(this);
 
         HorizontalListView.call(this, opts);
         this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
