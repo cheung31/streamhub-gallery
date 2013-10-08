@@ -7,9 +7,11 @@ define([
     'streamhub-sdk/content/types/twitter-content',
     'streamhub-sdk/content/content-view-factory',
     'streamhub-gallery/content/views/content-view',
+    'streamhub-gallery/content/views/tiled-attachment-list-view',
     'streamhub-gallery/content/views/twitter-content-view',
     'streamhub-gallery/content/views/facebook-content-view',
     'streamhub-gallery/content/views/instagram-content-view',
+    'streamhub-sdk/content/views/gallery-on-focus-view',
     'inherits'
 ], function(
     Content,
@@ -20,9 +22,11 @@ define([
     TwitterContent,
     BaseContentViewFactory,
     ContentView,
+    TiledAttachmentListView,
     TwitterContentView,
     FacebookContentView,
     InstagramContentView,
+    GalleryOnFocusView,
     inherits
 ) {
 
@@ -51,6 +55,13 @@ define([
         { type: LivefyreContent, view: ContentView },
         { type: Content, view: ContentView }
     ];
+
+    ContentViewFactory.prototype._createAttachmentsView = function (content) {
+        var tiledAttachmentListView = new TiledAttachmentListView();
+        return new GalleryOnFocusView(tiledAttachmentListView, {
+            content: content
+        });
+    };
 
     return ContentViewFactory;
 });

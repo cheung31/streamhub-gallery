@@ -27,13 +27,11 @@
             'streamhub-gallery',
             'streamhub-sdk/content',
             'streamhub-gallery/animators/coverflow-animator',
-            'streamhub-gallery/animators/carousel-animator',
             'streamhub-sdk-tests/mocks/mock-attachments-stream',
             'streamhub-sdk-tests/mocks/mock-stream'
         ],function (GalleryView, Content, CoverflowAnimator, MockAttachmentsStream, MockStream) {
             window.Content = Content;
             window.CoverflowAnimator = CoverflowAnimator;
-            window.CarouselAnimator = CarouselAnimator;
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3
