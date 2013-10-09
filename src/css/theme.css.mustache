@@ -46,6 +46,15 @@
     -ms-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
     -o-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
     transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
+    {{^ignoreTransformOrigin}}
+    {{#contentActive.transformOrigin}}
+    transform-origin: {{ contentActive.transformOrigin }};
+    -webkit-transform-origin: {{ contentActive.transformOrigin }};
+    -moz-transform-origin: {{ contentActive.transformOrigin }};
+    -ms-transform-origin: {{ contentActive.transformOrigin }};
+    -o-transform-origin: {{ contentActive.transformOrigin }};
+    {{/contentActive.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
 {{/contentAfter1}}
 

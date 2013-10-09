@@ -40,6 +40,7 @@ define([
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
         this._jumping = false;
+        this._forward = true;
 
         var self = this;
         this._newQueue.on('readable', function () {
@@ -243,8 +244,15 @@ define([
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
-        } else if (contentViewIndex >= this.views.length - 1) {
+        } else if (contentViewIndex >= this.views.length - 2) {
             this.showMore(this._numVisible + 2);
+        }
+
+        var activeIndex = this.views.indexOf(this._activeContentView);
+        if (contentViewIndex < activeIndex) {
+            this._forward = false;
+        } else if (contentViewIndex > activeIndex) {
+            this._forward = true;
         }
 
         var originalActiveContentView = this._activeContentView;

@@ -183,6 +183,17 @@ define([
         this._buildCssTransform();
 
         this._targetTransforms.ignoreTransformOrigin = opts.ignoreTransformOrigin;
+        if (this._galleryView._forward) {
+            if (this._targetTransforms.contentAfter1.transformOrigin) {
+                this._targetTransforms.contentActive = {};
+                this._targetTransforms.contentActive.transformOrigin = this._targetTransforms.contentAfter1.transformOrigin;
+            }
+        } else {
+            if (this._targetTransforms.contentBefore1.transformOrigin) {
+                this._targetTransforms.contentActive = {};
+                this._targetTransforms.contentActive.transformOrigin = this._targetTransforms.contentBefore1.transformOrigin;
+            }
+        }
 
         var styleInnerHtml = themeCssTemplate(this._targetTransforms);
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
