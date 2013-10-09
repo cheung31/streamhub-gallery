@@ -20,5 +20,16 @@ define([
     CoverflowAnimator.prototype._transforms.contentAfter2 =  { opacity: 0.3 };
     CoverflowAnimator.prototype._transforms.contentAfter3 =  { opacity: 0.1 };
 
+    CoverflowAnimator.prototype._computeNonVisibleTranslations = function () {
+        if (! this._targetTransforms.contentBefore.transforms) {
+            this._targetTransforms.contentBefore.transforms = {};
+        }
+        if (! this._targetTransforms.contentAfter.transforms) {
+            this._targetTransforms.contentAfter.transforms = {};
+        }
+        this._targetTransforms.contentBefore.transforms = $.extend({}, this._targetTransforms['contentBefore'+this._numVisible].transforms);
+        this._targetTransforms.contentAfter.transforms = $.extend({}, this._targetTransforms['contentAfter'+this._numVisible].transforms);
+    };
+
     return CoverflowAnimator;
 });

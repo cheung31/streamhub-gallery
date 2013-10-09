@@ -26,9 +26,6 @@ define([
 
     Animator.prototype.animate = function (opts) {
         opts = opts || {};
-        if (! opts.seek) {
-            this._galleryView.animating = true;
-        }
         var newTransforms = this._updateTransforms(opts);
         return newTransforms;
     };
@@ -41,7 +38,8 @@ define([
         return afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2;
     };
 
-    Animator.prototype._computeNonVisibleTranslations = function () {
+    Animator.prototype._computeNonVisibleTranslations = function (opts) {
+        opts = opts || {};
         if (! this._targetTransforms.contentBefore.transforms) {
             this._targetTransforms.contentBefore.transforms = {};
         }
@@ -50,6 +48,13 @@ define([
         }
         this._targetTransforms.contentBefore.transforms = $.extend({}, this._targetTransforms['contentBefore'+this._numVisible].transforms);
         this._targetTransforms.contentAfter.transforms = $.extend({}, this._targetTransforms['contentAfter'+this._numVisible].transforms);
+
+        if (opts.beforeTranslateX) {
+            this._targetTransforms.contentBefore.transforms.translateX = parseInt(this._targetTransforms.contentBefore.transforms.translateX) + opts.beforeTranslateX + 'px';
+        }
+        if (opts.afterTranslateX) {
+            this._targetTransforms.contentAfter.transforms.translateX = parseInt(this._targetTransforms.contentAfter.transforms.translateX) + opts.afterTranslateX + 'px';
+        }
     };
 
     Animator.prototype._updateTransforms = function (opts) {
@@ -118,7 +123,12 @@ define([
             }
             
             if (adjacentIndex === this._numVisible) {
-                this._computeNonVisibleTranslations();
+                beforeTranslateX = beforeTranslateX + contentBeforeWidth;
+                afterTranslateX = afterTranslateX + contentAfterWidth;
+                this._computeNonVisibleTranslations({
+                    beforeTranslateX: beforeTranslateX,
+                    afterTranslateX: afterTranslateX
+                });
             }
 
             this._galleryView.$el.removeClass('animate');
@@ -205,8 +215,6 @@ define([
 
         this._styleEl.remove();
         this._styleEl = $('<style></style>').text(styleInnerHtml).appendTo('head');
-
-        this._galleryView.animating = false;
     };
 
     Animator.prototype._isTranslation = function (transformName) {

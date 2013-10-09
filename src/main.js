@@ -29,7 +29,7 @@ define([
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
         this._numVisible = opts.numVisible || 3;
-        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible })
+        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 })
 
         this._animator = opts.animator || new Animator(this);
 
@@ -131,6 +131,13 @@ define([
             e.preventDefault();
             // Jump to head when the notification is clicked
             self.jumpTo(self.views[0]);
+        });
+
+        $(el).on('webkitTransitionEnd oTransitionEnd transitionend msTransitionEnd', function (e) {
+            var activeIndex = self.views.indexOf(self._activeContentView);
+            if (self.views.length-1 - activeIndex < self._numVisible) {
+                self.showMore(self._numVisible * 2);
+            }
         });
 
         HorizontalListView.prototype.setElement.call(this, el);
@@ -244,9 +251,7 @@ define([
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
-        } else if (contentViewIndex >= this.views.length - 2) {
-            this.showMore(this._numVisible + 2);
-        }
+        } 
 
         var activeIndex = this.views.indexOf(this._activeContentView);
         if (contentViewIndex < activeIndex) {
