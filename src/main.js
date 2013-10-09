@@ -31,16 +31,16 @@ define([
         this._numVisible = opts.numVisible || 3;
         opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 })
 
-        this._animator = opts.animator || new Animator(this);
-
-        HorizontalListView.call(this, opts);
-        this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
-
+        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
         this._activeContentView = null;
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
         this._jumping = false;
         this._forward = true;
+        this._animator = opts.animator || new Animator(this);
+
+        HorizontalListView.call(this, opts);
+        this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
 
         var self = this;
         this._newQueue.on('readable', function () {
@@ -49,8 +49,6 @@ define([
                 self.add(content);
             }
         });
-
-        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
 
         if (!STYLE_EL) {
             STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
