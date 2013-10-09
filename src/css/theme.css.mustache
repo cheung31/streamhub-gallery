@@ -6,13 +6,15 @@
     -ms-transform: {{ contentBefore.transform }};
     -o-transform: {{ contentBefore.transform }};
     transform: {{ contentBefore.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentBefore.transformOrigin}}
-    transform-origin: {{ contentBefore.transform }};
-    -webkit-transform-origin: {{ contentBefore.transform }};
-    -moz-transform-origin: {{ contentBefore.transform }};
-    -ms-transform-origin: {{ contentBefore.transform }};
-    -o-transform-origin: {{ contentBefore.transform }};
+    transform-origin: {{ contentBefore.transformOrigin }};
+    -webkit-transform-origin: {{ contentBefore.transformOrigin }};
+    -moz-transform-origin: {{ contentBefore.transformOrigin }};
+    -ms-transform-origin: {{ contentBefore.transformOrigin }};
+    -o-transform-origin: {{ contentBefore.transformOrigin }};
     {{/contentBefore.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
 {{/contentBefore}}
 
@@ -24,6 +26,7 @@
     -ms-transform: {{ contentAfter.transform }};
     -o-transform: {{ contentAfter.transform }};
     transform: {{ contentAfter.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentAfter.transformOrigin}}
     transform-origin: {{ contentAfter.transformOrigin }};
     -webkit-transform-origin: {{ contentAfter.transformOrigin }};
@@ -31,10 +34,11 @@
     -ms-transform-origin: {{ contentAfter.transformOrigin }};
     -o-transform-origin: {{ contentAfter.transformOrigin }};
     {{/contentAfter.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
 {{/contentAfter}}
 
-{{#contentAfter1.transform}}
+{{#contentAfter1}}
 .streamhub-gallery-view .content-active {
     opacity: {{#contentActive.opacity}}{{ contentActive.opacity }}{{/contentActive.opacity}}{{^contentActive.opacity}}1{{/contentActive.opacity}};
     -webkit-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
@@ -43,9 +47,9 @@
     -o-transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
     transform: {{#contentActive.transform}}{{ contentActive.transform }}{{/contentActive.transform}}{{^contentActive.transform}}translate(0px,0px){{/contentActive.transform}};
 }
-{{/contentAfter1.transform}}
+{{/contentAfter1}}
 
-{{#contentBefore1.transform}}
+{{#contentBefore1}}
 .streamhub-gallery-view .content-before-1 {
     opacity: {{ contentBefore1.opacity }};
     -webkit-transform: {{ contentBefore1.transform }};
@@ -53,6 +57,7 @@
     -ms-transform: {{ contentBefore1.transform }};
     -o-transform: {{ contentBefore1.transform }};
     transform: {{ contentBefore1.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentBefore1.transformOrigin}}
     transform-origin: {{ contentBefore1.transformOrigin }};
     -webkit-transform-origin: {{ contentBefore1.transformOrigin }};
@@ -60,10 +65,11 @@
     -ms-transform-origin: {{ contentBefore1.transformOrigin }};
     -o-transform-origin: {{ contentBefore1.transformOrigin }};
     {{/contentBefore1.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentBefore1.transform}}
+{{/contentBefore1}}
 
-{{#contentBefore2.transform}}
+{{#contentBefore2}}
 .streamhub-gallery-view .content-before-2 {
     opacity: {{ contentBefore2.opacity }};
     -webkit-transform: {{ contentBefore2.transform }};
@@ -71,6 +77,7 @@
     -ms-transform: {{ contentBefore2.transform }};
     -o-transform: {{ contentBefore2.transform }};
     transform: {{ contentBefore2.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentBefore2.transformOrigin}}
     transform-origin: {{ contentBefore2.transformOrigin }};
     -webkit-transform-origin: {{ contentBefore2.transformOrigin }};
@@ -78,10 +85,11 @@
     -ms-transform-origin: {{ contentBefore2.transformOrigin }};
     -o-transform-origin: {{ contentBefore2.transformOrigin }};
     {{/contentBefore2.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentBefore2.transform}}
+{{/contentBefore2}}
 
-{{#contentBefore3.transform}}
+{{#contentBefore3}}
 .streamhub-gallery-view .content-before-3 {
     opacity: {{ contentBefore3.opacity }};
     -webkit-transform: {{ contentBefore3.transform }};
@@ -89,6 +97,7 @@
     -ms-transform: {{ contentBefore3.transform }};
     -o-transform: {{ contentBefore3.transform }};
     transform: {{ contentBefore3.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentBefore3.transformOrigin}}
     transform-origin: {{ contentBefore3.transformOrigin }};
     -webkit-transform-origin: {{ contentBefore3.transformOrigin }};
@@ -96,10 +105,11 @@
     -ms-transform-origin: {{ contentBefore3.transformOrigin }};
     -o-transform-origin: {{ contentBefore3.transformOrigin }};
     {{/contentBefore3.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentBefore3.transform}}
+{{/contentBefore3}}
 
-{{#contentAfter1.transform}}
+{{#contentAfter1}}
 .streamhub-gallery-view .content-after-1 {
     opacity: {{ contentAfter1.opacity }};
     -webkit-transform: {{ contentAfter1.transform }};
@@ -107,6 +117,7 @@
     -ms-transform: {{ contentAfter1.transform }};
     -o-transform: {{ contentAfter1.transform }};
     transform: {{ contentAfter1.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentAfter1.transformOrigin}}
     -webkit-transform-origin: {{ contentAfter1.transformOrigin }};
     -moz-transform-origin: {{ contentAfter1.transformOrigin }};
@@ -114,10 +125,11 @@
     -o-transform-origin: {{ contentAfter1.transformOrigin }};
     transform-origin: {{ contentAfter1.transformOrigin }};
     {{/contentAfter1.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentAfter1.transform}}
+{{/contentAfter1}}
 
-{{#contentAfter2.transform}}
+{{#contentAfter2}}
 .streamhub-gallery-view .content-after-2 {
     opacity: {{ contentAfter2.opacity }};
     -webkit-transform: {{ contentAfter2.transform }};
@@ -125,6 +137,7 @@
     -ms-transform: {{ contentAfter2.transform }};
     -o-transform: {{ contentAfter2.transform }};
     transform: {{ contentAfter2.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentAfter2.transformOrigin}}
     transform-origin: {{ contentAfter2.transformOrigin }};
     -webkit-transform-origin: {{ contentAfter2.transformOrigin }};
@@ -132,10 +145,11 @@
     -ms-transform-origin: {{ contentAfter2.transformOrigin }};
     -o-transform-origin: {{ contentAfter2.transformOrigin }};
     {{/contentAfter2.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentAfter2.transform}}
+{{/contentAfter2}}
 
-{{#contentAfter3.transform}}
+{{#contentAfter3}}
 .streamhub-gallery-view .content-after-3 {
     opacity: {{ contentAfter3.opacity }};
     -webkit-transform: {{ contentAfter3.transform }};
@@ -143,6 +157,7 @@
     -ms-transform: {{ contentAfter3.transform }};
     -o-transform: {{ contentAfter3.transform }};
     transform: {{ contentAfter3.transform }};
+    {{^ignoreTransformOrigin}}
     {{#contentAfter3.transformOrigin}}
     transform-origin: {{ contentAfter3.transformOrigin }};
     -webkit-transform-origin: {{ contentAfter3.transformOrigin }};
@@ -150,5 +165,6 @@
     -ms-transform-origin: {{ contentAfter3.transformOrigin }};
     -o-transform-origin: {{ contentAfter3.transformOrigin }};
     {{/contentAfter3.transformOrigin}}
+    {{/ignoreTransformOrigin}}
 }
-{{/contentAfter3.transform}}
+{{/contentAfter3}}

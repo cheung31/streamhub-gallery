@@ -47,7 +47,6 @@ function (BaseTiledAttachmentListView, TiledAttachmentListTemplate, inherits) {
                 .removeClass(this.squareTileClassName)
                 .addClass(this.horizontalTileClassName);
         } else if (attachmentsCount === 2 || attachmentsCount > 4) {
-debugger;
             tiledAttachmentsEl.find(this.contentAttachmentSelector)
                 .removeClass(this.squareTileClassName)
                 .addClass(this.horizontalTileClassName);

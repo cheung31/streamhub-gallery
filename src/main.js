@@ -19,6 +19,7 @@ define([
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
      * @param opts.aspectRatio {Number} The element in which to render the streamed content
+     * @param opts.numVisible {Number} The number of adjacent content items visible
      * @param opts.animator {Animator} An instance of Animator that manages animating adjacent content
      * @exports streamhub-gallery
      * @augments streamhub-gallery/views/horizontal-list-view
@@ -27,7 +28,8 @@ define([
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
-        opts.more = opts.more || this._createMoreStream({ initial: 7 })
+        this._numVisible = opts.numVisible || 3;
+        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible })
 
         this._animator = opts.animator || new Animator(this);
 
@@ -62,7 +64,7 @@ define([
         this._animator.destroy();
         animator.setView(this);
         this._animator = animator;
-        this.jumpTo();
+        this.jumpTo(this._activeContentView);
     };
 
     /**
@@ -217,7 +219,11 @@ define([
 
         this.$el.removeClass('animate');
         this._focus();
-        this._animator.animate();
+        var activeContentViewIndex = this.views.indexOf(this._activeContentView);
+        // Only animate newly inserted items if it will be visible
+        if (newContentViewIndex >= Math.max(0, activeContentViewIndex-this._numVisible) && newContentViewIndex <= activeContentViewIndex+this._numVisible) {
+            this._animator.animate();
+        }
     };
 
     /**
@@ -237,20 +243,28 @@ define([
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
-        } else if (contentViewIndex >= this.views.length - 3) {
-            this.showMore(5);
+        } else if (contentViewIndex >= this.views.length - 1) {
+            this.showMore(this._numVisible + 2);
         }
 
         var originalActiveContentView = this._activeContentView;
 
+        // Seek to the target content view. This allows the 
+        // spacing between adjacent content views to be computed.
+        // The spacing is stored in an Object represented in CSS transform
+        // functions by the animator
         this.$el.removeClass('animate');
         this._focus(contentView);
         var newTransforms = this._animator.animate({ translate: false, seek: true });
 
+        // Revert to the originally active content view via seek.
+        // Using the previously computed transforms, we can now
+        // animate to the target content view.
         this.$el.removeClass('animate');
         this._focus(originalActiveContentView);
         this._animator.animate({ seek: true });
 
+        // Animate to the target content view with previously computed transforms.
         this.$el.addClass('animate');
         this._focus(contentView);
         this._animator.animate({ transforms: newTransforms });
