@@ -138,6 +138,16 @@ define([
             }
         });
 
+        $(window).on('keydown', function (e) {
+            if (!self.$el[0].hasFocus) {
+                if (e.keyCode == 37) {
+                    self.prev();
+                } else if (e.keyCode == 39) {
+                    self.next();
+                }
+            }
+        });
+
         HorizontalListView.prototype.setElement.call(this, el);
     };
 
