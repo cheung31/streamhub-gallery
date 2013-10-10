@@ -38,6 +38,7 @@ define([
         this._jumping = false;
         this._forward = true;
         this._animator = opts.animator || new Animator(this);
+        this._isFocused = false;
 
         HorizontalListView.call(this, opts);
         this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
@@ -138,15 +139,15 @@ define([
             }
         });
 
-        $(el).on('mouseover', function (e) {
-            this._focus = true;
+        $('body').on('mouseover', '.'+this.galleryListViewClassName, function (e) {
+            self._isFocused = true;
         });
-        $(el).on('mouseout', function (e) {
-            this._focus = false;
+        $('body').on('mouseout', '.'+this.galleryListViewClassName, function (e) {
+            self._isFocused = false;
         });
 
         $(window).on('keydown', function (e) {
-            if (self._focus) {
+            if (self._isFocused) {
                 if (e.keyCode == 37) {
                     self.prev();
                 } else if (e.keyCode == 39) {
