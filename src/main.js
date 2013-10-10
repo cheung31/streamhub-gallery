@@ -35,10 +35,10 @@ define([
         this._activeContentView = null;
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
-        this._jumping = false;
-        this._forward = true;
+        this._jumping = false; // Whether a jumpTo is being performed
+        this._forward = true; // Direction of paging
+        this._isFocused = false; // Whether the gallery view is focused
         this._animator = opts.animator || new Animator(this);
-        this._isFocused = false;
 
         HorizontalListView.call(this, opts);
         this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
@@ -146,15 +146,7 @@ define([
             self._isFocused = false;
         });
 
-        $(window).on('keydown', function (e) {
-            if (self._isFocused) {
-                if (e.keyCode == 37) {
-                    self.prev();
-                } else if (e.keyCode == 39) {
-                    self.next();
-                }
-            }
-        });
+        self._bindKeyDown();
 
         HorizontalListView.prototype.setElement.call(this, el);
     };
@@ -298,7 +290,24 @@ define([
         this._focus(contentView);
         this._animator.animate({ transforms: newTransforms });
 
-        this._jumping = false;
+        var self = this;
+        setTimeout(function () {
+            self._jumping = false;
+            self._bindKeyDown();
+        }, 500);
+    };
+
+    GalleryView.prototype._bindKeyDown = function () {
+        var self = this;
+        $(window).one('keydown', function (e) {
+            if (self._isFocused) {
+                if (e.keyCode == 37) {
+                    self.prev();
+                } else if (e.keyCode == 39) {
+                    self.next();
+                }
+            }
+        });
     };
 
     /**
