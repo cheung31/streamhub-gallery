@@ -138,8 +138,15 @@ define([
             }
         });
 
+        $(el).on('mouseover', function (e) {
+            this._focus = true;
+        });
+        $(el).on('mouseout', function (e) {
+            this._focus = false;
+        });
+
         $(window).on('keydown', function (e) {
-            if (!self.$el[0].hasFocus) {
+            if (self._focus) {
                 if (e.keyCode == 37) {
                     self.prev();
                 } else if (e.keyCode == 39) {
