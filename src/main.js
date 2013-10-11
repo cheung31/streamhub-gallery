@@ -1,12 +1,13 @@
 define([
     'streamhub-sdk/jquery',
+    'hammerjs',
     'streamhub-gallery/animators/animator',
     'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
     'streamhub-sdk/debug',
     'inherits'
-], function ($, Animator, HorizontalListView, GalleryViewCss, GalleryViewTemplate, debug, inherits) {
+], function ($, Hammer, Animator, HorizontalListView, GalleryViewCss, GalleryViewTemplate, debug, inherits) {
     'use strict';
 
     var log = debug('streamhub-sdk/views/list-view');
@@ -147,6 +148,15 @@ define([
         });
 
         self._bindKeyDown();
+
+        // Swipe
+        Hammer(el).on('swipeleft', function (e) {
+            self.next();
+        });
+
+        Hammer(el).on('swiperight', function (e) {
+            self.prev();
+        });
 
         HorizontalListView.prototype.setElement.call(this, el);
     };
