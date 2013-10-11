@@ -150,11 +150,11 @@ define([
         self._bindKeyDown();
 
         // Swipe
-        Hammer(el).on('swipeleft', function (e) {
+        Hammer(el).on('dragleft swipeleft', function (e) {
             self.next();
         });
 
-        Hammer(el).on('swiperight', function (e) {
+        Hammer(el).on('dragright swiperight', function (e) {
             self.prev();
         });
 
