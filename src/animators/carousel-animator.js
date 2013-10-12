@@ -20,20 +20,16 @@ define([
         transforms: {} };
     CarouselAnimator.prototype._transforms.contentBefore1 = {
         transformOrigin: 'right',
-        transforms: { rotateY: '-30deg' },
-        opacity: 0.7 };
+        transforms: { rotateY: '-30deg' } };
     CarouselAnimator.prototype._transforms.contentBefore2 = {
         transformOrigin: 'right',
-        transforms: { rotateY: '-52deg', scale: 0.6 },
-        opacity: 0.3 };
+        transforms: { rotateY: '-52deg', scale: 0.6 } };
     CarouselAnimator.prototype._transforms.contentAfter1 = {
         transformOrigin: 'left',
-        transforms: { rotateY: '30deg' },
-        opacity: 0.7 };
+        transforms: { rotateY: '30deg' } };
     CarouselAnimator.prototype._transforms.contentAfter2 = {
         transformOrigin: 'left',
-        transforms: { rotateY: '52deg', scale: 0.6 },
-        opacity: 0.3 };
+        transforms: { rotateY: '52deg', scale: 0.6 } };
 
     CarouselAnimator.prototype._computeBeforeTranslateX = function (beforeTranslateX, previousWidth, contentBeforeWidth) {
         return Animator.prototype._computeBeforeTranslateX.apply(this, arguments) - 25;

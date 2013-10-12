@@ -15,8 +15,8 @@ define([
     };
 
     Animator.prototype._transforms = {};
-    Animator.prototype._transforms.contentBefore = { transforms: { scale: 0.6 } };
-    Animator.prototype._transforms.contentAfter = { transforms: { scale: 0.6 } };
+    Animator.prototype._transforms.contentBefore = { transforms: { scale: 0.75 } };
+    Animator.prototype._transforms.contentAfter = { transforms: { scale: 0.75 } };
 
     Animator.prototype.animate = function (opts) {
         opts = opts || {};
