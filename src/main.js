@@ -150,11 +150,11 @@ define([
         self._bindKeyDown();
 
         // Swipe
-        Hammer(el).on('dragleft swipeleft', function (e) {
+        Hammer(el, { drag_block_vertical: true }).on('dragleft swipeleft', function (e) {
             self.next();
         });
 
-        Hammer(el).on('dragright swiperight', function (e) {
+        Hammer(el, { drag_block_vertical: true }).on('dragright swiperight', function (e) {
             self.prev();
         });
 
@@ -355,14 +355,13 @@ define([
         // Shift active and adjacent
         var contentContainerEls = this.$el.find('.content-container');
         contentContainerEls.removeClass('content-active')
-            .removeClass('content-before-3')
-            .removeClass('content-before-2')
-            .removeClass('content-before-1')
-            .removeClass('content-after-3')
-            .removeClass('content-after-2')
-            .removeClass('content-after-1')
             .removeClass('content-before')
             .removeClass('content-after');
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            contentContainerEls.removeClass('content-before-'+adjacentIndex);
+            contentContainerEls.removeClass('content-after-'+adjacentIndex);
+        }
 
         this._activeContentView = contentView ? contentView : this._activeContentView;
         var activeIndex = this.views.indexOf(this._activeContentView);
@@ -372,12 +371,16 @@ define([
         targetContainerEl.addClass('content-active');
         targetContainerEl.prevAll().addClass('content-before');
         targetContainerEl.nextAll().addClass('content-after');
-        var before1 = targetContainerEl.prev().addClass('content-before-1');
-        var before2 = before1.prev().addClass('content-before-2');
-        before2.prev().addClass('content-before-3');
-        var after1 = targetContainerEl.next().addClass('content-after-1');
-        var after2 = after1.next().addClass('content-after-2');
-        after2.next().addClass('content-after-3');
+
+        var beforeEl = targetContainerEl,
+            afterEl = targetContainerEl;
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            beforeEl = beforeEl.prev();
+            beforeEl.addClass('content-before-'+adjacentIndex);
+            afterEl = afterEl.next();
+            afterEl.addClass('content-after-'+adjacentIndex);
+        }
 
         this._adjustContentSize();
     };

@@ -6,8 +6,8 @@ define([
 
     var Animator = function (view, opts) {
         opts = opts || {};
+        this._numVisible = opts.numVisible;
         this._id = 'animator-' + (new Date()).getTime();
-        this._numVisible = opts.numVisible || 3;
         if (view) {
             this.setView(view);
         }
@@ -17,12 +17,6 @@ define([
     Animator.prototype._transforms = {};
     Animator.prototype._transforms.contentBefore = { transforms: { scale: 0.6 } };
     Animator.prototype._transforms.contentAfter = { transforms: { scale: 0.6 } };
-    Animator.prototype._transforms.contentBefore1 = { opacity: 0.7 };
-    Animator.prototype._transforms.contentBefore2 = { opacity: 0.3 };
-    Animator.prototype._transforms.contentBefore3 = { opacity: 0.1 };
-    Animator.prototype._transforms.contentAfter1 = { opacity: 0.7 };
-    Animator.prototype._transforms.contentAfter2 = { opacity: 0.3 };
-    Animator.prototype._transforms.contentAfter3 = { opacity: 0.1 };
 
     Animator.prototype.animate = function (opts) {
         opts = opts || {};
@@ -57,6 +51,34 @@ define([
         }
     };
 
+    Animator.prototype._updateDefaultTransforms = function () {
+        // Set opacity on adjacent
+        var opacityStep = 1 / this._numVisible;
+        var opacity = 1;
+        var zIndex = this._numVisible;
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            opacity -= opacityStep;
+            zIndex -= 1;
+
+            if ( ! this._transforms['contentBefore'+adjacentIndex]) {
+                this._transforms['contentBefore'+adjacentIndex] = {};
+            }
+            this._transforms['contentBefore'+adjacentIndex].opacity = opacity;
+            this._transforms['contentBefore'+adjacentIndex].zIndex = zIndex;
+
+            if ( ! this._transforms['contentAfter'+adjacentIndex]) {
+                this._transforms['contentAfter'+adjacentIndex] = {};
+            }
+            this._transforms['contentAfter'+adjacentIndex].opacity = opacity;
+            this._transforms['contentAfter'+adjacentIndex].zIndex = zIndex;
+        }
+    };
+
+    Animator.prototype._getDefaultTransforms = function () {
+        return $.extend(true, {}, this._transforms);
+    };
+
     Animator.prototype._updateTransforms = function (opts) {
         opts = opts || {};
 
@@ -73,7 +95,7 @@ define([
 
         // Do not animate while computing translation spacing
         this._galleryView.$el.removeClass('animate');
-        this._targetTransforms = $.extend(true, {}, this._transforms);
+        this._targetTransforms = this._getDefaultTransforms();
         // Do not apply transform-origin while computing translation spacing
         opts.ignoreTransformOrigin = true;
         this._updateStyleEl(opts);
@@ -175,7 +197,6 @@ define([
                 }
 
                 this._targetTransforms[style].transform = transform;
-
             }
         }
     };
@@ -205,7 +226,15 @@ define([
             }
         }
 
-        var styleInnerHtml = themeCssTemplate(this._targetTransforms);
+        var styleInnerHtml = '';
+        for (var t in this._targetTransforms) {
+            if (this._targetTransforms.hasOwnProperty(t)) {
+                styleInnerHtml += '.'+this._galleryView.galleryListViewClassName + ' .' + t.replace(/([A-Z0-9])/g, function($1){return "-"+$1.toLowerCase();});
+                styleInnerHtml += '{' + themeCssTemplate(this._targetTransforms[t]);
+                styleInnerHtml += '} ';
+            }
+        }
+
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
         for (var i=0; i < matches.length; i++) {
             var idx = styleInnerHtml.indexOf(matches[i]);
@@ -223,6 +252,8 @@ define([
 
     Animator.prototype.setView = function (view) {
         this._galleryView = view;
+        this._numVisible = this._numVisible || view._numVisible;
+        this._updateDefaultTransforms();
     };
 
     Animator.prototype.destroy = function () {

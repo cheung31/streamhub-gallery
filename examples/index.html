@@ -38,9 +38,11 @@
             var view = window.view = new GalleryView({
                 el: document.getElementById("view")
                 ,aspectRatio: 4/3
+                ,numVisible: 6
                 //,fullscreen: true
                 //,modal: false
             });
+            view.switchAnimator(new CarouselAnimator());
            
             var opts = {
                 "network": "labs-t402.fyre.co",

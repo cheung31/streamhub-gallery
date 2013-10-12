@@ -6,7 +6,7 @@ define([
 
     var CoverflowAnimator = function (view, opts) {
         opts = opts || {};
-        Animator.apply(this, arguments);
+        Animator.call(this, view, opts);
     };
     inherits(CoverflowAnimator, Animator);
 
@@ -16,9 +16,15 @@ define([
     CoverflowAnimator.prototype._transforms.contentBefore1 = { opacity: 0.7 };
     CoverflowAnimator.prototype._transforms.contentBefore2 = { opacity: 0.3 };
     CoverflowAnimator.prototype._transforms.contentBefore3 = { opacity: 0.1 };
+    CoverflowAnimator.prototype._transforms.contentBefore4 = { opacity: 0.7 };
+    CoverflowAnimator.prototype._transforms.contentBefore5 = { opacity: 0.3 };
+    CoverflowAnimator.prototype._transforms.contentBefore6 = { opacity: 0.1 };
     CoverflowAnimator.prototype._transforms.contentAfter1 =  { opacity: 0.7 };
     CoverflowAnimator.prototype._transforms.contentAfter2 =  { opacity: 0.3 };
     CoverflowAnimator.prototype._transforms.contentAfter3 =  { opacity: 0.1 };
+    CoverflowAnimator.prototype._transforms.contentAfter4 =  { opacity: 0.7 };
+    CoverflowAnimator.prototype._transforms.contentAfter5 =  { opacity: 0.3 };
+    CoverflowAnimator.prototype._transforms.contentAfter6 =  { opacity: 0.1 };
 
     CoverflowAnimator.prototype._computeNonVisibleTranslations = function () {
         if (! this._targetTransforms.contentBefore.transforms) {
