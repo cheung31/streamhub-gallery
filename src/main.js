@@ -154,6 +154,11 @@ define([
             }
         });
 
+        $(el).on('removeContentView.hub', function(e, content) {
+            $(e.target).closest('.content-container').remove();
+            self.remove(content);
+        });
+
         $('body').on('mouseover', '.'+this.galleryListViewClassName, function (e) {
             self._isFocused = true;
         });
