@@ -64,6 +64,15 @@ The ```GalleryView``` constructor accepts the ```animator``` option. By passing 
 Coverflow
 ![Coverflow Gallery View](http://i.imgur.com/AC8dxxW.png)
 
+### Number of Visible Content Slides
+
+By default, 3 content items will appear to before/after the focused content item. If you wish to adjust the number of visible adjacent items, specifiy the ```numVisible``` option for the ```GalleryView``` constructor.
+
+    var view = new GalleryView({
+        el: document.getElementById("myGallery"),
+        numVisible: 8 // Eight visible items to the before/after the active content view
+    });
+
 ## Local Development
 
 Instead of using a built version of streamhub-gallery from Livefyre's CDN, you may wish to fork, develop on the repo locally, or include it in your existing JavaScript application.
