@@ -4,10 +4,26 @@ define([
 ], function ($, themeCssTemplate) {
     'use strict';
 
+    var TRANSFORMATIONS = {
+        'translation': ['translateX','translateY','translateZ','translate','translate3d'],
+        'rotation': ['rotateX','rotateY','rotateZ','rotate','rotate3d'],
+        'skew': ['skewX','skewY','skewZ','skew','skew3d'],
+        'scale': ['scaleX','scaleY','scaleZ','scale','scale3d']
+    }
+
+    /**
+     * Manages updates to the DOM to facilitate animating of 
+     * visible content when jumping to content items
+     * @param view {GalleryView} An instance of GalleryView to perform animations upon
+     * @param opts {Object} A set of options to configure the Animatior with
+     * @param opts.numVisible {Number} The number of adjacent content items visible. If specified overrides the number of visible content items specified by the GalleryView instance
+     * @exports streamhub-gallery/animators/animator
+     * @constructor
+     */
     var Animator = function (view, opts) {
         opts = opts || {};
+        this._numVisible = opts.numVisible;
         this._id = 'animator-' + (new Date()).getTime();
-        this._numVisible = opts.numVisible || 3;
         if (view) {
             this.setView(view);
         }
@@ -15,48 +31,84 @@ define([
     };
 
     Animator.prototype._transforms = {};
-    Animator.prototype._transforms.contentBefore = { transforms: { scale: 0.6 } };
-    Animator.prototype._transforms.contentAfter = { transforms: { scale: 0.6 } };
-    Animator.prototype._transforms.contentBefore1 = { opacity: 0.7 };
-    Animator.prototype._transforms.contentBefore2 = { opacity: 0.3 };
-    Animator.prototype._transforms.contentBefore3 = { opacity: 0.1 };
-    Animator.prototype._transforms.contentAfter1 = { opacity: 0.7 };
-    Animator.prototype._transforms.contentAfter2 = { opacity: 0.3 };
-    Animator.prototype._transforms.contentAfter3 = { opacity: 0.1 };
+    Animator.prototype._transforms.contentBefore = { transforms: { scale: 0.85 } };
+    Animator.prototype._transforms.contentAfter = { transforms: { scale: 0.85 } };
 
+    /**
+     * Set the GalleryView instance for the animator to operate upon
+     */
+    Animator.prototype.setView = function (view) {
+        this._galleryView = view;
+        this._numVisible = this._numVisible || view._numVisible;
+        this._updateDefaultTransforms();
+    };
+
+
+    /**
+     * Starts the animation flow
+     * @param opts {Object}
+     * @param opts.transform {Object} The set of transforms to apply on visible items
+     * @param opts.translate {Boolean} Whether to exclude translate functions from the transforms to be applied
+     * @param opts.seek {Object} Perform the transition with 0s duration.
+     */
     Animator.prototype.animate = function (opts) {
         opts = opts || {};
         var newTransforms = this._updateTransforms(opts);
         return newTransforms;
     };
 
-    Animator.prototype._computeBeforeTranslateX = function (beforeTranslateX, previousWidth, contentBeforeWidth) {
-        return beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
+
+    /**
+     * @private
+     * A helper method to set z-index and opacity on
+     * adjacent visible content.
+     */ 
+    Animator.prototype._updateDefaultTransforms = function () {
+        // Set opacity on adjacent
+        var opacityStep = 1 / this._numVisible;
+        var opacity = 1;
+        var zIndex = this._numVisible;
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            opacity -= opacityStep;
+            zIndex -= 1;
+
+            if ( ! this._transforms['contentBefore'+adjacentIndex]) {
+                this._transforms['contentBefore'+adjacentIndex] = {};
+            }
+            this._transforms['contentBefore'+adjacentIndex].opacity = opacity;
+            this._transforms['contentBefore'+adjacentIndex].zIndex = zIndex;
+
+            if ( ! this._transforms['contentAfter'+adjacentIndex]) {
+                this._transforms['contentAfter'+adjacentIndex] = {};
+            }
+            this._transforms['contentAfter'+adjacentIndex].opacity = opacity;
+            this._transforms['contentAfter'+adjacentIndex].zIndex = zIndex;
+        }
     };
 
-    Animator.prototype._computeAfterTranslateX = function (afterTranslateX, previousWidth, contentAfterWidth) {
-        return afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2;
+
+    /**
+     * @private
+     * A helper method that returns a copy of the 
+     * ._transforms template object.
+     */ 
+    Animator.prototype._getDefaultTransforms = function () {
+        return $.extend(true, {}, this._transforms);
     };
 
-    Animator.prototype._computeNonVisibleTranslations = function (opts) {
-        opts = opts || {};
-        if (! this._targetTransforms.contentBefore.transforms) {
-            this._targetTransforms.contentBefore.transforms = {};
-        }
-        if (! this._targetTransforms.contentAfter.transforms) {
-            this._targetTransforms.contentAfter.transforms = {};
-        }
-        this._targetTransforms.contentBefore.transforms = $.extend({}, this._targetTransforms['contentBefore'+this._numVisible].transforms);
-        this._targetTransforms.contentAfter.transforms = $.extend({}, this._targetTransforms['contentAfter'+this._numVisible].transforms);
 
-        if (opts.beforeTranslateX) {
-            this._targetTransforms.contentBefore.transforms.translateX = parseInt(this._targetTransforms.contentBefore.transforms.translateX) + opts.beforeTranslateX + 'px';
-        }
-        if (opts.afterTranslateX) {
-            this._targetTransforms.contentAfter.transforms.translateX = parseInt(this._targetTransforms.contentAfter.transforms.translateX) + opts.afterTranslateX + 'px';
-        }
-    };
-
+    /**
+     * @private
+     * Updates the transform function values for all visible adjacent content
+     * in preparation for animating to the target state. Then applies
+     * the computed transform values as CSS in a <style> element to be 
+     * animated via CSS transition.
+     * @param opts {Object}
+     * @param opts.transform {Object} The set of transforms to apply on visible items
+     * @param opts.translate {Boolean} Whether to exclude translate functions from the transforms to be applied
+     * @param opts.seek {Object} Perform the transition with 0s duration.
+     */ 
     Animator.prototype._updateTransforms = function (opts) {
         opts = opts || {};
 
@@ -73,7 +125,7 @@ define([
 
         // Do not animate while computing translation spacing
         this._galleryView.$el.removeClass('animate');
-        this._targetTransforms = $.extend(true, {}, this._transforms);
+        this._targetTransforms = this._getDefaultTransforms();
         // Do not apply transform-origin while computing translation spacing
         opts.ignoreTransformOrigin = true;
         this._updateStyleEl(opts);
@@ -150,13 +202,59 @@ define([
         return $.extend(true, {}, this._targetTransforms);
     };
 
-    var TRANSFORMATIONS = {
-        'translation': ['translateX','translateY','translateZ','translate','translate3d'],
-        'rotation': ['rotateX','rotateY','rotateZ','rotate','rotate3d'],
-        'skew': ['skewX','skewY','skewZ','skew','skew3d'],
-        'scale': ['scaleX','scaleY','scaleZ','scale','scale3d']
-    }
 
+    /**
+     * @private
+     * A helper method to determine the translation relative to its adjacent 
+     * content for content items preceding the active content
+     */ 
+    Animator.prototype._computeBeforeTranslateX = function (beforeTranslateX, previousWidth, contentBeforeWidth) {
+        return beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
+    };
+
+
+    /**
+     * @private
+     * A helper method to determine the translation relative to its adjacent
+     * content for content items following the active content
+     */ 
+    Animator.prototype._computeAfterTranslateX = function (afterTranslateX, previousWidth, contentAfterWidth) {
+        return afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2;
+    };
+
+
+    /**
+     * @private
+     * Determines the translations for non-visible content.
+     * The translation should be computed in a way so that transitioning from non-visible to
+     * visible state feels continuous.
+     */ 
+    Animator.prototype._computeNonVisibleTranslations = function (opts) {
+        opts = opts || {};
+        if (! this._targetTransforms.contentBefore.transforms) {
+            this._targetTransforms.contentBefore.transforms = {};
+        }
+        if (! this._targetTransforms.contentAfter.transforms) {
+            this._targetTransforms.contentAfter.transforms = {};
+        }
+        this._targetTransforms.contentBefore.transforms = $.extend({}, this._targetTransforms['contentBefore'+this._numVisible].transforms);
+        this._targetTransforms.contentAfter.transforms = $.extend({}, this._targetTransforms['contentAfter'+this._numVisible].transforms);
+
+        if (opts.beforeTranslateX) {
+            this._targetTransforms.contentBefore.transforms.translateX = parseInt(this._targetTransforms.contentBefore.transforms.translateX) + opts.beforeTranslateX + 'px';
+        }
+        if (opts.afterTranslateX) {
+            this._targetTransforms.contentAfter.transforms.translateX = parseInt(this._targetTransforms.contentAfter.transforms.translateX) + opts.afterTranslateX + 'px';
+        }
+    };
+
+
+    /**
+     * @private
+     * Takes the structured transforms object and sets a string of the 
+     * CSS transform value for each visible class name's specified transform
+     * as seen in the ._targetTransforms property
+     */ 
     Animator.prototype._buildCssTransform = function () {
         for (var style in this._targetTransforms) {
             var transform = '';
@@ -175,7 +273,6 @@ define([
                 }
 
                 this._targetTransforms[style].transform = transform;
-
             }
         }
     };
@@ -184,6 +281,9 @@ define([
      * @private
      * Replaces a style element that determines the spacing, and animations when 
      * the gallery changes focus
+     * @param opts {Object}
+     * @param opts.ignoreTransformOrigin {Boolean}
+     * @param opts.translate {Boolean}
      */
     Animator.prototype._updateStyleEl = function (opts) {
         opts = opts || {};
@@ -205,7 +305,15 @@ define([
             }
         }
 
-        var styleInnerHtml = themeCssTemplate(this._targetTransforms);
+        var styleInnerHtml = '';
+        for (var t in this._targetTransforms) {
+            if (this._targetTransforms.hasOwnProperty(t)) {
+                styleInnerHtml += '.'+this._galleryView.galleryListViewClassName + ' .' + t.replace(/([A-Z0-9])/g, function($1){return "-"+$1.toLowerCase();});
+                styleInnerHtml += '{' + themeCssTemplate(this._targetTransforms[t]);
+                styleInnerHtml += '} ';
+            }
+        }
+
         var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
         for (var i=0; i < matches.length; i++) {
             var idx = styleInnerHtml.indexOf(matches[i]);
@@ -217,14 +325,21 @@ define([
         this._styleEl = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
 
+
+    /**
+     * @private
+     * Check whether a transform function is a translation
+     * @return {Boolean} Whether the transform function is a translation
+     */
     Animator.prototype._isTranslation = function (transformName) {
         return transformName.indexOf('translate') === -1 ? false : true;
     };
 
-    Animator.prototype.setView = function (view) {
-        this._galleryView = view;
-    };
 
+    /**
+     * @private
+     * Remove anything appended to the DOM by the animator for animation purposes
+     */
     Animator.prototype.destroy = function () {
         this._styleEl.remove();
     };
