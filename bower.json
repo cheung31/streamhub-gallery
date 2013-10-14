@@ -1,11 +1,11 @@
 {
   "name": "streamhub-gallery",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": [
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#v2.0.2",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#v2.0.3+build.271",
     "jquery": "~1.10.1",
     "hogan": "latest",
     "requirejs": "~2.1.5",
@@ -20,5 +20,15 @@
     "jasmine": "*",
     "jasmine-jquery": "*",
     "almond": "~0.2.5"
+  },
+  "streamhub": {
+    "icon": "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbbigHF-302x227.png",
+    "iconHover": "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbbigLF-302x227.png",
+    "background": "https://raw.github.com/Livefyre/streamhub-wall/master/images/appgallery-mediawall-v2.jpg",
+    "sampleImages": [
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbprev-700x525_1.png",
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbprev-700x525_2.png",
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbprev-700x525_3.png"
+    ]
   }
 }
