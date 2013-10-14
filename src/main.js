@@ -1,12 +1,13 @@
 define([
     'streamhub-sdk/jquery',
+    'hammerjs',
     'streamhub-gallery/animators/animator',
     'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
     'streamhub-sdk/debug',
     'inherits'
-], function ($, Animator, HorizontalListView, GalleryViewCss, GalleryViewTemplate, debug, inherits) {
+], function ($, Hammer, Animator, HorizontalListView, GalleryViewCss, GalleryViewTemplate, debug, inherits) {
     'use strict';
 
     var log = debug('streamhub-sdk/views/list-view');
@@ -60,12 +61,19 @@ define([
     GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
 
+
+    /**
+     * Switch the Animator instance that the GalleryView uses the animate 
+     * jumping between content
+     * @param animator {Animator} The animator instance to use for animating jumping
+     */
     GalleryView.prototype.switchAnimator = function (animator) {
         this._animator.destroy();
         animator.setView(this);
         this._animator = animator;
         this.jumpTo(this._activeContentView);
     };
+
 
     /**
      * @private
@@ -84,6 +92,7 @@ define([
         }
         requestMore();
     };
+
 
     /**
      * Set the element for the view to render in.
@@ -116,9 +125,15 @@ define([
         });
 
         $(el).on('imageLoaded.hub', function (e) {
-            self._adjustSquareContentSize();
-            if (!this._jumping) {
-                self._animator.animate();
+            var imageContentEl = $(e.target).closest('.content');
+            var tiledAttachmentsEl = imageContentEl.find('.content-attachments-tiled');
+            if (tiledAttachmentsEl.length === 1) {
+                imageContentEl.fadeIn();
+
+                self._adjustSquareContentSize();
+                if (!self._jumping) {
+                    self._animator.animate();
+                }
             }
         });
 
@@ -139,6 +154,11 @@ define([
             }
         });
 
+        $(el).on('removeContentView.hub', function(e, content) {
+            $(e.target).closest('.content-container').remove();
+            self.remove(content);
+        });
+
         $('body').on('mouseover', '.'+this.galleryListViewClassName, function (e) {
             self._isFocused = true;
         });
@@ -148,8 +168,18 @@ define([
 
         self._bindKeyDown();
 
+        // Swipe
+        Hammer(el, { drag_block_vertical: true }).on('dragleft swipeleft', function (e) {
+            self.next();
+        });
+
+        Hammer(el, { drag_block_vertical: true }).on('dragright swiperight', function (e) {
+            self.prev();
+        });
+
         HorizontalListView.prototype.setElement.call(this, el);
     };
+
 
     /**
      * Add a piece of Content to the ListView
@@ -170,9 +200,20 @@ define([
             contentView = HorizontalListView.prototype.add.call(this, content);
         }
 
+        if (contentView.attachmentsView.tileableCount() > 0) {
+            contentView.$el.hide();
+        }
+
         return contentView;
     };
 
+    /**
+     * Remove a piece of Content from the ListView
+     * If content to remove is associated to the GalleryView's active content view
+     * unset the reference
+     * @param content {Content} A Content model to add to the ListView
+     * @returns the newly created ContentView
+     */
     GalleryView.prototype.remove = function (content) {
         var contentView = this.getContentView(content);
         if (this._activeContentView === contentView) {
@@ -212,6 +253,7 @@ define([
      * Insert a contentView into the ListView's .el
      * after being wrapped by a container element.
      * Get insertion index based on this.comparator
+     * If the inserted contentView is visible, invoke the animation flow
      * @param contentView {ContentView} The ContentView's element to insert to the DOM
      */
     GalleryView.prototype._insert = function (contentView) {
@@ -297,6 +339,12 @@ define([
         }, 500);
     };
 
+    /**
+     * @private
+     * Binds an event handler to the keydown event
+     * Event handler handles left/right arrow keys, and jumps to
+     * previous/next content respectively.
+     */
     GalleryView.prototype._bindKeyDown = function () {
         var self = this;
         $(window).one('keydown', function (e) {
@@ -329,9 +377,10 @@ define([
     };
 
     /**
-     * Displays the specified ContentView to be active, or defaults to the first ContentView in the gallery
-     * @param opts {Object} A set of options to change the focus of the gallery view with
-     * @param opts.contentView {ContentView} The ContentView to be active
+     * @private
+     * Sets the specified ContentView to be active, or defaults to the first ContentView in the gallery
+     * Updates class names for visible content relative to the active ContentView
+     * @param contentView {ContentView} The ContentView to be active
      */
     GalleryView.prototype._focus = function (contentView) {
         if (! this.views.length) {
@@ -345,14 +394,13 @@ define([
         // Shift active and adjacent
         var contentContainerEls = this.$el.find('.content-container');
         contentContainerEls.removeClass('content-active')
-            .removeClass('content-before-3')
-            .removeClass('content-before-2')
-            .removeClass('content-before-1')
-            .removeClass('content-after-3')
-            .removeClass('content-after-2')
-            .removeClass('content-after-1')
             .removeClass('content-before')
             .removeClass('content-after');
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            contentContainerEls.removeClass('content-before-'+adjacentIndex);
+            contentContainerEls.removeClass('content-after-'+adjacentIndex);
+        }
 
         this._activeContentView = contentView ? contentView : this._activeContentView;
         var activeIndex = this.views.indexOf(this._activeContentView);
@@ -362,12 +410,16 @@ define([
         targetContainerEl.addClass('content-active');
         targetContainerEl.prevAll().addClass('content-before');
         targetContainerEl.nextAll().addClass('content-after');
-        var before1 = targetContainerEl.prev().addClass('content-before-1');
-        var before2 = before1.prev().addClass('content-before-2');
-        before2.prev().addClass('content-before-3');
-        var after1 = targetContainerEl.next().addClass('content-after-1');
-        var after2 = after1.next().addClass('content-after-2');
-        after2.next().addClass('content-after-3');
+
+        var beforeEl = targetContainerEl,
+            afterEl = targetContainerEl;
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            beforeEl = beforeEl.prev();
+            beforeEl.addClass('content-before-'+adjacentIndex);
+            afterEl = afterEl.next();
+            afterEl.addClass('content-after-'+adjacentIndex);
+        }
 
         this._adjustContentSize();
     };
@@ -424,6 +476,12 @@ define([
         this._adjustSquareContentSize();
     };
 
+
+    /**
+     * @private
+     * Finds content that is intrinsically 1:1 ratio. For the most part, these
+     * content will be associated with ContentViews that have tiled attachments
+     */
     GalleryView.prototype._adjustSquareContentSize = function () {
         // Make content with tiled attachments square except when there's a
         // video attachment
