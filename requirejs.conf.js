@@ -11,7 +11,8 @@ requirejs.config({
     json: 'lib/requirejs-plugins/src/json',
     base64: 'lib/base64/base64',
     'event-emitter': 'lib/event-emitter/src/event-emitter',
-    inherits: 'lib/inherits/inherits'
+    inherits: 'lib/inherits/inherits',
+    hammerjs: 'lib/hammerjs/dist/hammer'
   },
   packages: [{
     name: "streamhub-sdk",
@@ -55,6 +56,9 @@ requirejs.config({
     },
     jquery: {
         exports: '$'
+    },
+    hammerjs: {
+        exports: 'Hammer'
     }
   },
   urlArgs: "_=" +  (new Date()).getTime()

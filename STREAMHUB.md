@@ -71,27 +71,3 @@ By default, 3 content items will appear to before/after the focused content item
         numVisible: 8 // Eight visible items before/after the active content view
     });
 
-## Local Development
-
-Instead of using a built version of streamhub-gallery from Livefyre's CDN, you may wish to fork, develop on the repo locally, or include it in your existing JavaScript application.
-
-Clone this repo
-
-    git clone https://github.com/Livefyre/streamhub-gallery
-
-Development dependencies are managed by [npm](https://github.com/isaacs/npm), which you should install first.
-
-With npm installed, install streamhub-gallery's dependencies. This will also download [Bower](https://github.com/bower/bower) and use it to install browser dependencies.
-
-    cd streamhub-gallery
-    npm install
-
-This repository's package.json includes a helpful script to launch a web server for development
-
-    npm start
-
-You can now visit [http://localhost:8080/](http://localhost:8080/) to see an example feed loaded via RequireJS.
-
-# StreamHub
-
-[Livefyre StreamHub](http://www.livefyre.com/streamhub/) is used by the world's biggest brands and publishers to power their online Content Communities. StreamHub turns your site into a real-time social experience. Curate images, videos, and Tweets from across the social web, right into live blogs, chats, widgets, and dashboards. Want StreamHub? [Contact Livefyre](http://www.livefyre.com/contact/).
