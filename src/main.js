@@ -127,9 +127,7 @@ define([
         $(el).on('imageLoaded.hub', function (e) {
             var imageContentEl = $(e.target).closest('.content');
             var tiledAttachmentsEl = imageContentEl.find('.content-attachments-tiled');
-            if (tiledAttachmentsEl.length === 1) {
-                imageContentEl.fadeIn();
-
+            if (tiledAttachmentsEl.children().length === 1) {
                 self._adjustSquareContentSize();
                 if (!self._jumping) {
                     self._animator.animate();
@@ -198,10 +196,6 @@ define([
 
         if (! contentView) {
             contentView = HorizontalListView.prototype.add.call(this, content);
-        }
-
-        if (contentView.attachmentsView.tileableCount() > 0) {
-            contentView.$el.hide();
         }
 
         return contentView;
