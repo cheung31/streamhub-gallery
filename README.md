@@ -48,8 +48,6 @@ Optionally, include some reasonable default CSS rules for StreamHub Content. Thi
 
         collection.pipe(view);
 
-You now have a Timeline! See this all in action on [this jsfiddle](http://jsfiddle.net/G9PPf/5/).
-
 ### Changing Themes
 
 The ```GalleryView``` constructor accepts the ```animator``` option. By passing in an instance of a ```Animator```, the Gallery view can be customized to visualize a stream to your liking. There are two animators included, ```streamhub-gallery/animators/coverflow-animator``` and ```streamhub-gallery/animators/carousel-animator```.
