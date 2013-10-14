@@ -70,7 +70,7 @@ By default, 3 content items will appear to before/after the focused content item
 
     var view = new GalleryView({
         el: document.getElementById("myGallery"),
-        numVisible: 8 // Eight visible items to the before/after the active content view
+        numVisible: 8 // Eight visible items before/after the active content view
     });
 
 ## Local Development
