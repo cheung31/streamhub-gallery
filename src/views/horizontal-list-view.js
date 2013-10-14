@@ -34,7 +34,7 @@ define([
 
         var self = this;
         $(window).on('resize', function (e) {
-            self._adjustContentSize();
+            self._handleResize(e);
         });
         this._adjustContentSize();
     };
@@ -52,6 +52,10 @@ define([
     HorizontalListView.prototype.setElement = function (el) {
         ContentListView.prototype.setElement.call(this, el);
         this.$el.addClass(this.horizontalListViewClassName).addClass(this._id);
+    };
+
+    HorizontalListView.prototype._handleResize = function (e) {
+        this._adjustContentSize();
     };
 
     /**
@@ -92,7 +96,7 @@ define([
         var newContentViewIndex,
             $previousEl;
 
-        newContentViewIndex = this.contentViews.indexOf(contentView);
+        newContentViewIndex = this.views.indexOf(contentView);
 
         var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
         contentView.$el.wrap($containerEl);
@@ -103,11 +107,11 @@ define([
             $wrappedEl.prependTo(this.el);
         } else {
             // Find it's previous contentView and insert new contentView after
-            $previousEl = this.contentViews[newContentViewIndex - 1].$el;
+            $previousEl = this.views[newContentViewIndex - 1].$el;
             $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
         }
         
-        this.$el.css('width', this.contentViews.length * this.contentViews[0].$el.parent().outerWidth(true) + 'px');
+        this.$el.css('width', this.views.length * this.views[0].$el.parent().outerWidth(true) + 'px');
     };
 
     return HorizontalListView;

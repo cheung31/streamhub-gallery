@@ -4,7 +4,7 @@
   "author": {
     "name": "cheung31"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "devDependencies": {
     "bower": "~1.0.0",
     "http-server": "*",
@@ -26,8 +26,5 @@
     "build-version": "node tools/build_version.js",
     "lessc": "./node_modules/less/bin/lessc --yui-compress src/css/gallery-view.{less,css}",
     "jsdoc": "rm -rf docs/api && ./node_modules/jsdoc/jsdoc -c tools/jsdoc.conf.json"
-  },
-  "streamhub": {
-    "sampleImage": ""
   }
 }

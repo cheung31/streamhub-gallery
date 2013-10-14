@@ -1,37 +1,18 @@
 define([
     'streamhub-sdk/jquery',
+    'hammerjs',
+    'streamhub-gallery/animators/animator',
     'streamhub-gallery/views/horizontal-list-view',
     'text!streamhub-gallery/css/gallery-view.css',
     'hgn!streamhub-gallery/templates/gallery-view',
-    'hgn!streamhub-gallery/css/theme.css',
     'streamhub-sdk/debug',
     'inherits'
-], function ($, HorizontalListView, GalleryViewCss, GalleryViewTemplate, themeCssTemplate, debug, inherits) {
+], function ($, Hammer, Animator, HorizontalListView, GalleryViewCss, GalleryViewTemplate, debug, inherits) {
     'use strict';
 
     var log = debug('streamhub-sdk/views/list-view');
 
-    var STYLE_EL,
-        GALLERY_THEME_STYLE_EL = $('<style></style>');
-
-    var GALLERY_CSS = {
-        contentBefore: {
-            transforms: {
-                translateX: '-9999px'
-            }
-        },
-        contentAfter: {
-            transforms: {
-                translateX: '9999px'
-            }
-        }
-    };
-    GALLERY_CSS.contentBefore1 = { opacity: 0.7 };
-    GALLERY_CSS.contentBefore2 = { opacity: 0.3 };
-    GALLERY_CSS.contentBefore3 = { opacity: 0.1 };
-    GALLERY_CSS.contentAfter1 = { opacity: 0.7 };
-    GALLERY_CSS.contentAfter2 = { opacity: 0.3 };
-    GALLERY_CSS.contentAfter3 = { opacity: 0.1 };
+    var STYLE_EL;
 
     /**
      * A simple View that displays Content in a list (`<ul>` by default).
@@ -39,7 +20,8 @@ define([
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
      * @param opts.aspectRatio {Number} The element in which to render the streamed content
-     * @param opts.thumbnailScale {Number} The scale value of non-focused ContentViews
+     * @param opts.numVisible {Number} The number of adjacent content items visible
+     * @param opts.animator {Animator} An instance of Animator that manages animating adjacent content
      * @exports streamhub-gallery
      * @augments streamhub-gallery/views/horizontal-list-view
      * @constructor
@@ -47,17 +29,20 @@ define([
     var GalleryView = function (opts) {
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
+        this._numVisible = opts.numVisible || 3;
+        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 })
 
-        HorizontalListView.call(this, opts);
-        this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
-
+        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
         this._activeContentView = null;
         this._newContentCount = 0;
         this._newQueue = this._createMoreStream(opts);
-        this._animating = false;
-        this._thumbnailScale = opts.thumbnailScale || 0.6;
-        GALLERY_CSS.contentAfter.transforms.scale = this._thumbnailScale;
-        GALLERY_CSS.contentBefore.transforms.scale = this._thumbnailScale;
+        this._jumping = false; // Whether a jumpTo is being performed
+        this._forward = true; // Direction of paging
+        this._isFocused = false; // Whether the gallery view is focused
+        this._animator = opts.animator || new Animator(this);
+
+        HorizontalListView.call(this, opts);
+        this.$galleryEl = this.$el.find('.'+this.galleryListViewClassName);
 
         var self = this;
         this._newQueue.on('readable', function () {
@@ -67,8 +52,6 @@ define([
             }
         });
 
-        this._id = this.galleryListViewClassName + '-' + new Date().getTime();
-
         if (!STYLE_EL) {
             STYLE_EL = $('<style></style>').text(GalleryViewCss).prependTo('head');
         }
@@ -77,6 +60,20 @@ define([
 
     GalleryView.prototype.template = GalleryViewTemplate;
     GalleryView.prototype.galleryListViewClassName = 'streamhub-gallery-view';
+
+
+    /**
+     * Switch the Animator instance that the GalleryView uses the animate 
+     * jumping between content
+     * @param animator {Animator} The animator instance to use for animating jumping
+     */
+    GalleryView.prototype.switchAnimator = function (animator) {
+        this._animator.destroy();
+        animator.setView(this);
+        this._animator = animator;
+        this.jumpTo(this._activeContentView);
+    };
+
 
     /**
      * @private
@@ -95,6 +92,7 @@ define([
         }
         requestMore();
     };
+
 
     /**
      * Set the element for the view to render in.
@@ -123,12 +121,19 @@ define([
                     break;
                 }
             }
-            self.jump(targetContentView);
+            self.jumpTo(targetContentView);
         });
 
         $(el).on('imageLoaded.hub', function (e) {
-            if (! this._animating) {
-                self._adjustContentSize();
+            var imageContentEl = $(e.target).closest('.content');
+            var tiledAttachmentsEl = imageContentEl.find('.content-attachments-tiled');
+            if (tiledAttachmentsEl.length === 1) {
+                imageContentEl.fadeIn();
+
+                self._adjustSquareContentSize();
+                if (!self._jumping) {
+                    self._animator.animate();
+                }
             }
         });
 
@@ -139,11 +144,42 @@ define([
         $(el).on('click', '.streamhub-gallery-view-notification', function (e) {
             e.preventDefault();
             // Jump to head when the notification is clicked
-            self.jump(self.views[0]);
+            self.jumpTo(self.views[0]);
+        });
+
+        $(el).on('webkitTransitionEnd oTransitionEnd transitionend msTransitionEnd', function (e) {
+            var activeIndex = self.views.indexOf(self._activeContentView);
+            if (self.views.length-1 - activeIndex < self._numVisible) {
+                self.showMore(self._numVisible * 2);
+            }
+        });
+
+        $(el).on('removeContentView.hub', function(e, content) {
+            $(e.target).closest('.content-container').remove();
+            self.remove(content);
+        });
+
+        $('body').on('mouseover', '.'+this.galleryListViewClassName, function (e) {
+            self._isFocused = true;
+        });
+        $('body').on('mouseout', '.'+this.galleryListViewClassName, function (e) {
+            self._isFocused = false;
+        });
+
+        self._bindKeyDown();
+
+        // Swipe
+        Hammer(el, { drag_block_vertical: true }).on('dragleft swipeleft', function (e) {
+            self.next();
+        });
+
+        Hammer(el, { drag_block_vertical: true }).on('dragright swiperight', function (e) {
+            self.prev();
         });
 
         HorizontalListView.prototype.setElement.call(this, el);
     };
+
 
     /**
      * Add a piece of Content to the ListView
@@ -164,9 +200,20 @@ define([
             contentView = HorizontalListView.prototype.add.call(this, content);
         }
 
+        if (contentView.attachmentsView.tileableCount() > 0) {
+            contentView.$el.hide();
+        }
+
         return contentView;
     };
 
+    /**
+     * Remove a piece of Content from the ListView
+     * If content to remove is associated to the GalleryView's active content view
+     * unset the reference
+     * @param content {Content} A Content model to add to the ListView
+     * @returns the newly created ContentView
+     */
     GalleryView.prototype.remove = function (content) {
         var contentView = this.getContentView(content);
         if (this._activeContentView === contentView) {
@@ -180,7 +227,7 @@ define([
      * Display the new content notification
      */
     GalleryView.prototype._showNewNotification = function () {
-        if (! this._newContentCount) {
+        if (this._newContentCount < 1) {
             return;
         }
         var notificationEl = this.$el.find('.streamhub-gallery-view-notification');
@@ -206,6 +253,7 @@ define([
      * Insert a contentView into the ListView's .el
      * after being wrapped by a container element.
      * Get insertion index based on this.comparator
+     * If the inserted contentView is visible, invoke the animation flow
      * @param contentView {ContentView} The ContentView's element to insert to the DOM
      */
     GalleryView.prototype._insert = function (contentView) {
@@ -227,14 +275,25 @@ define([
             $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
         }
 
-        this.focus();
+        this.$el.removeClass('animate');
+        this._focus();
+        var activeContentViewIndex = this.views.indexOf(this._activeContentView);
+        // Only animate newly inserted items if it will be visible
+        if (newContentViewIndex >= Math.max(0, activeContentViewIndex-this._numVisible) && newContentViewIndex <= activeContentViewIndex+this._numVisible) {
+            this._animator.animate();
+        }
     };
 
     /**
      * Focus the gallery view to the specified ContentView
      * @param contentView {ContentView} The ContentView to display as the active content
      */
-    GalleryView.prototype.jump = function (contentView) {
+    GalleryView.prototype.jumpTo = function (contentView) {
+        if (this._jumping) {
+            return;
+        }
+        this._jumping = true;
+
         var contentViewIndex = this.views.indexOf(contentView);
         if (contentViewIndex === 0) {
             this.newContentCount = 0;
@@ -242,30 +301,61 @@ define([
         } else if (contentViewIndex < this._newContentCount) {
             this._newContentCount -= this._newContentCount - contentViewIndex;
             this._showNewNotification();
-        } else if (contentViewIndex >= this.views.length - 3) {
-            this.showMore(3);
+        } 
+
+        var activeIndex = this.views.indexOf(this._activeContentView);
+        if (contentViewIndex < activeIndex) {
+            this._forward = false;
+        } else if (contentViewIndex > activeIndex) {
+            this._forward = true;
         }
-        this.$el.removeClass('animate');
+
         var originalActiveContentView = this._activeContentView;
-        // Apply transforms exclusive of translations to calculate spacing
-        var newTransforms = $.extend(true, {}, this.focus({
-            translate: false,
-            contentView: contentView
-        }));
-        // Revert to original state of spacing
-        this.focus({
-            contentView: originalActiveContentView
-        });
-        // Apply calculated transforms to original state
+
+        // Seek to the target content view. This allows the 
+        // spacing between adjacent content views to be computed.
+        // The spacing is stored in an Object represented in CSS transform
+        // functions by the animator
+        this.$el.removeClass('animate');
+        this._focus(contentView);
+        var newTransforms = this._animator.animate({ translate: false, seek: true });
+
+        // Revert to the originally active content view via seek.
+        // Using the previously computed transforms, we can now
+        // animate to the target content view.
+        this.$el.removeClass('animate');
+        this._focus(originalActiveContentView);
+        this._animator.animate({ seek: true });
+
+        // Animate to the target content view with previously computed transforms.
+        this.$el.addClass('animate');
+        this._focus(contentView);
+        this._animator.animate({ transforms: newTransforms });
+
         var self = this;
         setTimeout(function () {
-            self.$el.addClass('animate');
-            self.focus({
-                translate: newTransforms,
-                contentView: contentView
-            });
-            self._animating = false;
-        }, 250);
+            self._jumping = false;
+            self._bindKeyDown();
+        }, 500);
+    };
+
+    /**
+     * @private
+     * Binds an event handler to the keydown event
+     * Event handler handles left/right arrow keys, and jumps to
+     * previous/next content respectively.
+     */
+    GalleryView.prototype._bindKeyDown = function () {
+        var self = this;
+        $(window).one('keydown', function (e) {
+            if (self._isFocused) {
+                if (e.keyCode == 37) {
+                    self.prev();
+                } else if (e.keyCode == 39) {
+                    self.next();
+                }
+            }
+        });
     };
 
     /**
@@ -274,7 +364,7 @@ define([
     GalleryView.prototype.next = function () {
         var activeIndex = this.views.indexOf(this._activeContentView);
         var targetContentView = this.views[Math.min(activeIndex+1, this.views.length-1)];
-        this.jump(targetContentView);
+        this.jumpTo(targetContentView);
     };
 
     /**
@@ -283,34 +373,36 @@ define([
     GalleryView.prototype.prev = function () {
         var activeIndex = this.views.indexOf(this._activeContentView);
         var targetContentView = this.views[activeIndex-1 || 0];
-        this.jump(targetContentView);
+        this.jumpTo(targetContentView);
     };
 
     /**
-     * Displays the specified ContentView to be active, or defaults to the first ContentView in the gallery
-     * @param opts {Object} A set of options to change the focus of the gallery view with
-     * @param opts.contentView {ContentView} The ContentView to be active
+     * @private
+     * Sets the specified ContentView to be active, or defaults to the first ContentView in the gallery
+     * Updates class names for visible content relative to the active ContentView
+     * @param contentView {ContentView} The ContentView to be active
      */
-    GalleryView.prototype.focus = function (opts) {
+    GalleryView.prototype._focus = function (contentView) {
+        if (! this.views.length) {
+            return;
+        }
+
         if (! this._activeContentView) {
             this._activeContentView = this.views[0];
         }
 
-        opts = opts || {};
-
+        // Shift active and adjacent
         var contentContainerEls = this.$el.find('.content-container');
         contentContainerEls.removeClass('content-active')
-            .removeClass('content-before-3')
-            .removeClass('content-before-2')
-            .removeClass('content-before-1')
-            .removeClass('content-after-3')
-            .removeClass('content-after-2')
-            .removeClass('content-after-1')
             .removeClass('content-before')
-            .removeClass('content-after')
-            .removeAttr('style');
+            .removeClass('content-after');
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            contentContainerEls.removeClass('content-before-'+adjacentIndex);
+            contentContainerEls.removeClass('content-after-'+adjacentIndex);
+        }
 
-        this._activeContentView = opts.contentView ? opts.contentView : this._activeContentView;
+        this._activeContentView = contentView ? contentView : this._activeContentView;
         var activeIndex = this.views.indexOf(this._activeContentView);
 
         var targetContentEl = this.views[activeIndex].$el;
@@ -318,14 +410,18 @@ define([
         targetContainerEl.addClass('content-active');
         targetContainerEl.prevAll().addClass('content-before');
         targetContainerEl.nextAll().addClass('content-after');
-        var before1 = targetContainerEl.prev().addClass('content-before-1');
-        var before2 = before1.prev().addClass('content-before-2');
-        before2.prev().addClass('content-before-3');
-        var after1 = targetContainerEl.next().addClass('content-after-1');
-        var after2 = after1.next().addClass('content-after-2');
-        after2.next().addClass('content-after-3');
 
-        return this._adjustContentSize(opts);
+        var beforeEl = targetContainerEl,
+            afterEl = targetContainerEl;
+        for (var i=0; i < this._numVisible; i++) {
+            var adjacentIndex = i+1;
+            beforeEl = beforeEl.prev();
+            beforeEl.addClass('content-before-'+adjacentIndex);
+            afterEl = afterEl.next();
+            afterEl.addClass('content-after-'+adjacentIndex);
+        }
+
+        this._adjustContentSize();
     };
 
     /**
@@ -352,6 +448,11 @@ define([
         return { width: contentWidth, height: contentHeight };
     };
 
+    GalleryView.prototype._handleResize = function (e) {
+        this._adjustContentSize();
+        this._animator.animate();
+    };
+
     /**
      * @private
      * Sets appropriate dimensions on each ContentView in the gallery.
@@ -359,7 +460,7 @@ define([
      * For content whose intrinsic apsect ratio is 1:1, it will retain a 1:1 aspect ratio.
      * ContentViews with tiled attachments will also retain a 1:1 aspect ratio.
      */
-    GalleryView.prototype._adjustContentSize = function (opts) {
+    GalleryView.prototype._adjustContentSize = function () {
         var styleEl = $('style.'+this._id);
         if (styleEl) {
             styleEl.remove();
@@ -372,8 +473,19 @@ define([
         styleEl.html(styles);
         $('head').append(styleEl);
 
+        this._adjustSquareContentSize();
+    };
+
+
+    /**
+     * @private
+     * Finds content that is intrinsically 1:1 ratio. For the most part, these
+     * content will be associated with ContentViews that have tiled attachments
+     */
+    GalleryView.prototype._adjustSquareContentSize = function () {
         // Make content with tiled attachments square except when there's a
         // video attachment
+        var contentSize = this._getContentSize();
         var contentWithImageEls = this.$el.find('.content-with-image');
         for (var i=0; i < contentWithImageEls.length; i++) {
             var contentEl = contentWithImageEls.eq(i).closest('.content-container');
@@ -390,103 +502,6 @@ define([
                 });
             }
         }
-
-        return this._relayout(opts);
-    };
-
-    /**
-     * @private
-     * Triggers a resizing/respacing of ContentViews
-     */
-    GalleryView.prototype._relayout = function (opts) {
-        this._animating = true;
-        return this._slideshowSpacing(opts);
-    };
-
-    /**
-     * @private
-     * Applies correct spacing for all ContentViews
-     */
-    GalleryView.prototype._slideshowSpacing = function (opts) {
-        opts = opts || {};
-        var visibleAdjacentContent = 3;
-
-        if (opts.translate) {
-            GALLERY_CSS = opts.translate;
-            this._updateStyleEl(opts.translate);
-            return;
-        }
-
-        var adjacentContentEls = this.$el.find('.content-before, .content-after, .content-active');
-        if (!adjacentContentEls.length) {
-            return;
-        }
-
-        var beforeTranslateX = 0;
-        var afterTranslateX = 0;
-        for (var i=0; i < visibleAdjacentContent; i++) {
-            var adjacentIndex = i+1;
-
-            // Before
-            var contentBefore = adjacentContentEls.filter('.content-before-'+adjacentIndex);
-            var contentBeforeWidth;
-            var previousEl;
-            var previousWidth;
-            if (contentBefore.length) {
-                GALLERY_CSS['contentBefore'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentBefore.transforms);
-                contentBeforeWidth = contentBefore[0].getBoundingClientRect().width;
-                previousEl = contentBefore.next();
-                previousWidth = previousEl[0].getBoundingClientRect().width;
-                beforeTranslateX = beforeTranslateX - previousWidth - (contentBeforeWidth - previousWidth)/2;
-                GALLERY_CSS['contentBefore'+adjacentIndex].transforms.translateX = beforeTranslateX+'px';
-            }
-
-            // After
-            var contentAfter = adjacentContentEls.filter('.content-after-'+adjacentIndex);
-            var contentAfterWidth;
-            if (contentAfter.length) {
-                GALLERY_CSS['contentAfter'+adjacentIndex].transforms = $.extend({}, GALLERY_CSS.contentAfter.transforms);
-                contentAfterWidth = contentAfter[0].getBoundingClientRect().width;
-                previousEl = contentAfter.prev();
-                previousWidth = previousEl[0].getBoundingClientRect().width;
-                afterTranslateX = afterTranslateX + previousWidth + (contentAfterWidth - previousWidth)/2;
-                GALLERY_CSS['contentAfter'+adjacentIndex].transforms.translateX = afterTranslateX+'px';
-            }
-        }
-
-        this._updateStyleEl(opts.translate);
-
-        return GALLERY_CSS;
-    };
-
-    /**
-     * @private
-     * Replaces a style element that determines the spacing, and animations when 
-     * the gallery changes focus
-     */
-    GalleryView.prototype._updateStyleEl = function (translate) {
-        translate = translate === undefined ? true : translate;
-        for (var style in GALLERY_CSS) {
-            if (GALLERY_CSS.hasOwnProperty(style)) {
-                var transform = '';
-                for (var t in GALLERY_CSS[style].transforms) {
-                    if (translate || style === 'contentBefore' || style === 'contentAfter' || (!translate && t.indexOf('translate') === -1)) {
-                        transform = transform + t + '(' + GALLERY_CSS[style].transforms[t]  + ') ';
-                    }
-                }
-                GALLERY_CSS[style].transform = transform;
-            }
-        }
-        var styleInnerHtml = themeCssTemplate(GALLERY_CSS);
-        var matches = styleInnerHtml.match(new RegExp("(\A|\})\s*(?![^ ~>|]*\.*\{)", 'g'));
-        for (var i=0; i < matches.length; i++) {
-            var idx = styleInnerHtml.indexOf(matches[i]);
-            styleInnerHtml = styleInnerHtml.slice(0, idx) + 
-                this._id + styleInnerHtml.slice(idx);
-        }
-
-        GALLERY_THEME_STYLE_EL.remove();
-        GALLERY_THEME_STYLE_EL = $('<style></style>').text(styleInnerHtml).appendTo('head');
     };
 
     return GalleryView;
