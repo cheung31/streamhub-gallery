@@ -264,10 +264,12 @@ define([
                 }
 
                 for (var transformType in TRANSFORMATIONS) {
-                    for (var i=0; i < TRANSFORMATIONS[transformType].length; i++) {
-                        var transformFunc = TRANSFORMATIONS[transformType][i];
-                        if (this._targetTransforms[style].transforms[transformFunc]) {
-                            transform = transform + transformFunc + '(' + this._targetTransforms[style].transforms[transformFunc] + ') ';
+                    if (TRANSFORMATIONS.hasOwnProperty(transformType)) {
+                        for (var i=0; i < TRANSFORMATIONS[transformType].length; i++) {
+                            var transformFunc = TRANSFORMATIONS[transformType][i];
+                            if (this._targetTransforms[style].transforms[transformFunc]) {
+                                transform = transform + transformFunc + '(' + this._targetTransforms[style].transforms[transformFunc] + ') ';
+                            }
                         }
                     }
                 }
