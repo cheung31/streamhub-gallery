@@ -30,7 +30,7 @@ define([
         opts = opts || {};
         opts.aspectRatio = opts.aspectRatio || 16/9;
         this._numVisible = opts.numVisible || 3;
-        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 })
+        opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 });
 
         this._id = this.galleryListViewClassName + '-' + new Date().getTime();
         this._activeContentView = null;
@@ -343,9 +343,9 @@ define([
         var self = this;
         $(window).one('keydown', function (e) {
             if (self._isFocused) {
-                if (e.keyCode == 37) {
+                if (e.keyCode === 37) {
                     self.prev();
-                } else if (e.keyCode == 39) {
+                } else if (e.keyCode === 39) {
                     self.next();
                 }
             }
@@ -390,8 +390,9 @@ define([
         contentContainerEls.removeClass('content-active')
             .removeClass('content-before')
             .removeClass('content-after');
+        var adjacentIndex;
         for (var i=0; i < this._numVisible; i++) {
-            var adjacentIndex = i+1;
+            adjacentIndex = i+1;
             contentContainerEls.removeClass('content-before-'+adjacentIndex);
             contentContainerEls.removeClass('content-after-'+adjacentIndex);
         }
@@ -408,7 +409,7 @@ define([
         var beforeEl = targetContainerEl,
             afterEl = targetContainerEl;
         for (var i=0; i < this._numVisible; i++) {
-            var adjacentIndex = i+1;
+            adjacentIndex = i+1;
             beforeEl = beforeEl.prev();
             beforeEl.addClass('content-before-'+adjacentIndex);
             afterEl = afterEl.next();

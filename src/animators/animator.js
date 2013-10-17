@@ -9,7 +9,7 @@ define([
         'rotation': ['rotateX','rotateY','rotateZ','rotate','rotate3d'],
         'skew': ['skewX','skewY','skewZ','skew','skew3d'],
         'scale': ['scaleX','scaleY','scaleZ','scale','scale3d']
-    }
+    };
 
     /**
      * Manages updates to the DOM to facilitate animating of 
