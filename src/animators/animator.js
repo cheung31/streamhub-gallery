@@ -102,7 +102,7 @@ define([
      * @private
      * Updates the transform function values for all visible adjacent content
      * in preparation for animating to the target state. Then applies
-     * the computed transform values as CSS in a <style> element to be 
+     * the computed transform values as CSS in a STYLE element to be 
      * animated via CSS transition.
      * @param opts {Object}
      * @param opts.transform {Object} The set of transforms to apply on visible items
