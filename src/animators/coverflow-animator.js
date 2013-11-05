@@ -1,7 +1,8 @@
 define([
+    'streamhub-sdk/jquery',
     'streamhub-gallery/animators/animator',
     'inherits'
-], function (Animator, inherits) {
+], function ($, Animator, inherits) {
     'use strict';
 
     var CoverflowAnimator = function (view, opts) {
