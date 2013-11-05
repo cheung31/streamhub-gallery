@@ -28,7 +28,7 @@ define([
      */
     var GalleryView = function (opts) {
         opts = opts || {};
-        opts.aspectRatio = opts.aspectRatio || 16/9;
+        opts.aspectRatio = opts.aspectRatio || 4/3;
         this._numVisible = opts.numVisible || 3;
         opts.more = opts.more || this._createMoreStream({ initial: this._numVisible * 2 });
 

@@ -43,6 +43,7 @@ requirejs.config({
     location: './tests/'
   }
   ],
+  include: ['streamhub-gallery/animators/coverflow-animator', 'streamhub-gallery/animators/carousel-animator'],
   shim: {
     jasmine: {
       exports: 'jasmine'
