@@ -62,5 +62,13 @@ requirejs.config({
         exports: '$'
     }
   },
-  urlArgs: "_=" +  (new Date()).getTime()
+  urlArgs: "_=" +  (new Date()).getTime(),
+  onBuildRead: function(moduleName, path, contents) {
+    switch (moduleName) {
+      case "hammerjs":
+        // UMD style doesn't do well with namespaced Defines
+        contents = "(function () { var define = Livefyre.define; " + contents + "}());";
+        break;
+    }
+  }
 });
