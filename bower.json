@@ -1,11 +1,11 @@
 {
   "name": "streamhub-gallery",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": [
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.0.4",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.7",
     "jquery": "~1.10.1",
     "hogan": "latest",
     "requirejs": "~2.1.5",

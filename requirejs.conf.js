@@ -41,8 +41,11 @@ requirejs.config({
   },{
     name: 'streamhub-gallery-tests',
     location: './tests/'
-  }
-  ],
+  },{
+    name: "view",
+    location: "lib/view/src",
+    main: "view"
+  }],
   include: ['streamhub-gallery/animators/coverflow-animator', 'streamhub-gallery/animators/carousel-animator'],
   shim: {
     jasmine: {
@@ -57,9 +60,6 @@ requirejs.config({
     },
     jquery: {
         exports: '$'
-    },
-    hammerjs: {
-        exports: 'Hammer'
     }
   },
   urlArgs: "_=" +  (new Date()).getTime()
